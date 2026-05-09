@@ -39,14 +39,28 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
       }
     } else {
       if (Phaser.Input.Keyboard.JustDown(this._space) && time - this.lastDashTime >= BEE.DASH_COOLDOWN) {
+        // Determine dash direction from held keys; fall back to current facing
+        const left  = this._cursors.left.isDown  || this._wasd.A.isDown;
+        const right = this._cursors.right.isDown || this._wasd.D.isDown;
+        const up    = this._cursors.up.isDown    || this._wasd.W.isDown;
+        const down  = this._cursors.down.isDown  || this._wasd.S.isDown;
+        const ax = (right ? 1 : 0) - (left ? 1 : 0);
+        const ay = (down  ? 1 : 0) - (up   ? 1 : 0);
+
+        const dashAngle = (ax !== 0 || ay !== 0)
+          ? Math.atan2(ay, ax)
+          : this.rotation + Math.PI / 2;
+
+        // Snap rotation so stinger faces the dash direction immediately
+        this.rotation = dashAngle - Math.PI / 2;
+
         this.isDashing = true;
         this.dashEndTime = time + BEE.DASH_DURATION;
         this.lastDashTime = time;
         this.setTint(0x88ffff);
-        
-        const angle = this.rotation + Math.PI / 2;
+
         const dashSpeed = this._speed * BEE.DASH_SPEED_MULTIPLIER;
-        this.setVelocity(Math.cos(angle) * dashSpeed, Math.sin(angle) * dashSpeed);
+        this.setVelocity(Math.cos(dashAngle) * dashSpeed, Math.sin(dashAngle) * dashSpeed);
       }
     }
 
