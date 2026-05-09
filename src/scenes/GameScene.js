@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { WORLD, BEE, HIVE, WASP, WAVE, FLOWER, TIMER, WORKER, TOWER, XP, BUTTERFLY, SPIDER, WEB, WIND, pickFlowerType } from '../constants.js';
+import MetaSave from '../systems/MetaSave.js';
 import Flower from '../entities/Flower.js';
 import Hive from '../entities/Hive.js';
 import ResourceManager from '../systems/ResourceManager.js';
@@ -132,6 +133,27 @@ export default class GameScene extends Phaser.Scene {
       baseCount: WAVE.BASE_COUNT,
       countIncrement: WAVE.COUNT_INCREMENT,
     });
+
+    // Apply meta-progression upgrades from save
+    const _metaSave = MetaSave.load();
+    const _u = _metaSave.upgrades;
+
+    if (_u.BEE_SPEED_META)    this.player._speed += _u.BEE_SPEED_META * 20;
+    if (_u.BEE_HP_META)       { this.player.maxHp += _u.BEE_HP_META * 2; this.player.hp = this.player.maxHp; }
+    if (_u.HIVE_HP_META)      { this.hive.maxHp   += _u.HIVE_HP_META * 5; this.hive.hp  = this.hive.maxHp; }
+    if (_u.HIVE_STORAGE_META) this.resources.setHoneyStorage(HIVE.HONEY_STORAGE + _u.HIVE_STORAGE_META * 50);
+
+    if (_u.START_WORKER) {
+      const _w = new WorkerBee(this, this.hiveX, this.hiveY);
+      _w.init(this.hive, this.flowers);
+      this.workers.add(_w);
+    }
+    if (_u.START_ARMOR)  this.player.armor = 1;
+    if (_u.START_HONEY)  { this.resources.addPendingSap(30); this.resources.convertSap(30); }
+    if (_u.START_GUARD)  {
+      const _post = new GuardPost(this, this.hiveX + 80, this.hiveY);
+      this._towerList.push(_post);
+    }
 
     this.physics.add.overlap(this.stingers, this.wasps, (stinger, wasp) => {
       stinger.destroy();
@@ -527,7 +549,10 @@ export default class GameScene extends Phaser.Scene {
   _endGame(won) {
     if (this._ended) return;
     this._ended = true;
-    this.scene.start('GameOverScene', { won, score: this._calculateScore() });
+    const score = this._calculateScore();
+    const waves = this.waveManager.getWaveNumber();
+    const timeSurvived = Math.floor(this._playTime / 1000);
+    this.scene.start('GameOverScene', { won, score, waves, timeSurvived });
   }
 
   _calculateScore() {

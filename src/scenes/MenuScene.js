@@ -14,12 +14,20 @@ export default class MenuScene extends Phaser.Scene {
       fontSize: '22px', color: '#ffffff',
     }).setOrigin(0.5);
 
-    const btn = this.add.text(cx, cy + 60, '[ START ]', {
+    const btnStart = this.add.text(cx, cy + 60, '[ START ]', {
       fontSize: '36px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-    btn.on('pointerover', () => btn.setColor('#ffffff'));
-    btn.on('pointerout', () => btn.setColor('#ffd700'));
-    btn.on('pointerdown', () => this.scene.start('PlacementScene'));
+    btnStart.on('pointerover', () => btnStart.setColor('#ffffff'));
+    btnStart.on('pointerout',  () => btnStart.setColor('#ffd700'));
+    btnStart.on('pointerdown', () => this.scene.start('PlacementScene'));
+
+    const btnUpgrades = this.add.text(cx, cy + 120, '[ UPGRADES ]', {
+      fontSize: '28px', color: '#ffd700',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    btnUpgrades.on('pointerover', () => btnUpgrades.setColor('#ffffff'));
+    btnUpgrades.on('pointerout',  () => btnUpgrades.setColor('#ffd700'));
+    btnUpgrades.on('pointerdown', () => this.scene.start('MetaUpgradeScene'));
   }
 }

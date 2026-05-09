@@ -1,30 +1,60 @@
 import Phaser from 'phaser';
+import MetaSave from '../systems/MetaSave.js';
 
 export default class GameOverScene extends Phaser.Scene {
   constructor() { super('GameOverScene'); }
 
   init(data) {
-    this.won = data.won ?? false;
-    this.score = data.score ?? 0;
+    this.won          = data.won          ?? false;
+    this.score        = data.score        ?? 0;
+    this.waves        = data.waves        ?? 0;
+    this.timeSurvived = data.timeSurvived ?? 0;
+
+    const earned = Math.floor(this.score / 10);
+    MetaSave.addJelly(earned);
+    this.earned = earned;
+
+    const s = MetaSave.load();
+    if (this.score > s.highScore) {
+      s.highScore = this.score;
+    }
+    s.lastRun = { score: this.score, waves: this.waves, timeSurvived: this.timeSurvived, won: this.won };
+    MetaSave.save(s);
+    this.highScore = MetaSave.load().highScore;
   }
 
   create() {
     const cx = 640, cy = 360;
+    const s28 = { fontSize: '28px', color: '#ffffff' };
+    const sGold = { fontSize: '32px', color: '#ffd700' };
 
-    this.add.text(cx, cy - 80, this.won ? 'YOU WIN!' : 'HIVE DESTROYED', {
+    this.add.text(cx, 120, this.won ? 'YOU WIN!' : 'HIVE DESTROYED', {
       fontSize: '56px',
       color: this.won ? '#ffd700' : '#ff4444',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(cx, cy, `Score: ${this.score}`, {
-      fontSize: '32px', color: '#ffffff',
+    this.add.text(cx, 210, `Score: ${this.score}`, sGold).setOrigin(0.5);
+    this.add.text(cx, 260, `Waves survived: ${this.waves}`, s28).setOrigin(0.5);
+
+    const mins = Math.floor(this.timeSurvived / 60);
+    const secs = String(this.timeSurvived % 60).padStart(2, '0');
+    this.add.text(cx, 300, `Time: ${mins}:${secs}`, s28).setOrigin(0.5);
+
+    this.add.text(cx, 360, `+${this.earned} Royal Jelly`, {
+      fontSize: '36px', color: '#ffcc00', fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    const btn = this.add.text(cx, cy + 80, '[ PLAY AGAIN ]', {
+    this.add.text(cx, 420, `All-time high score: ${this.highScore}`, {
+      fontSize: '24px', color: '#aaaaaa',
+    }).setOrigin(0.5);
+
+    const btn = this.add.text(cx, 500, '[ BACK TO MENU ]', {
       fontSize: '28px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
+    btn.on('pointerover', () => btn.setColor('#ffffff'));
+    btn.on('pointerout',  () => btn.setColor('#ffd700'));
     btn.on('pointerdown', () => this.scene.start('MenuScene'));
   }
 }
