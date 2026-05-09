@@ -90,15 +90,15 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     this.setAcceleration(ax * accel, ay * accel);
 
     if (this.body.velocity.lengthSq() > 10) {
-      const targetRotation = this.body.velocity.angle() - Math.PI / 2;
+      const targetRotation = this.body.velocity.angle() + Math.PI / 2;
       this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.15);
     }
   }
 
   _autoFire(time) {
     if (!this._onFire || time - this._lastFired < this._stingerRate) return;
-    // Backward = opposite of stinger-facing direction
-    const backwardAngle = this.rotation - Math.PI / 2;
+    // Stinger is at bottom; during head-forward movement, stinger points opposite to head
+    const backwardAngle = this.rotation + Math.PI / 2;
     const fired = this._onFire(this.x, this.y, this._stingerRange, this._stingerDamage, this._stingerSpeed, backwardAngle);
     if (fired) this._lastFired = time;
   }
