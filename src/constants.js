@@ -130,6 +130,13 @@ export const WIND = {
   LERP_RATE: 0.004,      // per-frame lerp rate toward new wind target (~12s to fully shift)
 };
 
+export const WASP_HIVE = {
+  HP: 30,
+  REGEN_INTERVAL: 10000,
+  REGEN_BASE: 0.5,
+  REGEN_PER_HONEY: 0.1,
+};
+
 export const BREAKABLE = {
   HP: 3,                 // health of the breakable object
   SPAWN_DELAY: 20000,    // ms between spawn attempts

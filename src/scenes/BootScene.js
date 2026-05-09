@@ -129,6 +129,16 @@ export default class BootScene extends Phaser.Scene {
     g.fillRect(0, 4, 12, 4);
     g.generateTexture('health-pickup', 12, 12);
 
+    // wasp-hive: brown square with dark center
+    g.clear();
+    g.fillStyle(0x884400);
+    g.fillRect(0, 0, 64, 64);
+    g.fillStyle(0xcc6600);
+    g.fillRect(8, 8, 48, 48);
+    g.fillStyle(0x000000);
+    g.fillCircle(32, 32, 12);
+    g.generateTexture('wasp-hive', 64, 64);
+
     g.destroy();
     this.scene.start('MenuScene');
   }
