@@ -129,6 +129,15 @@ export default class BootScene extends Phaser.Scene {
     g.fillRect(0, 4, 12, 4);
     g.generateTexture('health-pickup', 12, 12);
 
+    // honey-drop: golden droplet
+    g.clear();
+    g.fillStyle(0xffaa00);
+    g.fillCircle(8, 9, 6);
+    g.fillTriangle(8, 0, 3, 8, 13, 8);
+    g.fillStyle(0xffdd55);
+    g.fillCircle(6, 8, 2);
+    g.generateTexture('honey-drop', 16, 16);
+
     // wasp-hive: brown square with dark center
     g.clear();
     g.fillStyle(0x884400);

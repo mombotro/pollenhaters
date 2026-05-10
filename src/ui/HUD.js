@@ -20,7 +20,8 @@ export default class HUD {
     this._xpText      = scene.add.text(16, 172, '', s).setScrollFactor(0).setDepth(100);
     this._waspHoneyText = scene.add.text(16, 198, '', s).setScrollFactor(0).setDepth(100);
     this._timerText   = scene.add.text(640, 16, '', { ...s, fontSize: '24px' })
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(100);
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(100)
+      .setVisible(!scene._playground);
     this._windText    = scene.add.text(640, 42, '', s)
       .setOrigin(0.5, 0).setScrollFactor(0).setDepth(100);
   }

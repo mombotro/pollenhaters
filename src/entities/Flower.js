@@ -34,7 +34,7 @@ export default class Flower extends Phaser.Physics.Arcade.Sprite {
     switch (this._state) {
       case STATE.YOUNG:
         if (this._matureAt === null) this._matureAt = time + FLOWER.YOUNG_DURATION;
-        if (time >= this._matureAt) this._enterMature();
+        if (time >= this._matureAt) this._enterMature(time);
         break;
 
       case STATE.MATURE:
@@ -84,7 +84,8 @@ export default class Flower extends Phaser.Physics.Arcade.Sprite {
     if (this._typeDef.tint) this.setTint(this._typeDef.tint);
   }
 
-  _enterMature() {
+  _enterMature(time = 0) {
+    this._matureAt = time;
     this._state = STATE.MATURE;
     this.setScale(1);
     this.setAlpha(1);

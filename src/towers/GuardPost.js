@@ -19,12 +19,16 @@ export default class GuardPost extends Phaser.Physics.Arcade.Sprite {
   takeDamage(amount) {
     this.hp = Math.max(0, this.hp - amount);
     this.setTint(0xff4444);
-    this.scene.time.delayedCall(150, () => { if (this.active) this.clearTint(); });
+    this.scene.time.delayedCall(150, () => {
+      if (!this.active) return;
+      if (this.hp <= 0) this.setTint(0x222222);
+      else this.clearTint();
+    });
     if (this.hp <= 0) {
       this._guard.alive = false;
       this._guard.setVisible(false).setActive(false);
       if (this._guard.body) this._guard.body.enable = false;
-      this.setVisible(false).setActive(false);
+      this.setAlpha(0.45);
       this.body.enable = false;
     }
   }

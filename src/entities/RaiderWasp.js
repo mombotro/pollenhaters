@@ -14,6 +14,7 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
     this.slowedUntil = 0;
     this.isRetreating = false;
     this.retreatTarget = null;
+    this.honeyCarried = 0;
     this.lastHit = 0;
     this.setDrag(800, 800);
   }
@@ -52,6 +53,9 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
         : baseSpeed;
       this._movePhysics(this.retreatTarget.x, this.retreatTarget.y, speed);
       if (Phaser.Math.Distance.Between(this.x, this.y, this.retreatTarget.x, this.retreatTarget.y) < 50) {
+        if (this.honeyCarried > 0 && this.scene.waspHiveSystem) {
+          this.scene.waspHiveSystem.onHoneyStolen(this.honeyCarried);
+        }
         this.destroy();
       }
       return;

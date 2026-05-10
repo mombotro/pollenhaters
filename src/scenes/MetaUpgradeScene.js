@@ -10,6 +10,8 @@ const UPGRADES = [
   { key: 'START_ARMOR',       label: 'Start: Armor',   cost: 150, max: 1, desc: 'Begin with 1 armor' },
   { key: 'START_HONEY',       label: 'Start: Honey',   cost: 80,  max: 1, desc: 'Begin with 30 honey' },
   { key: 'START_GUARD',       label: 'Start: Guard',   cost: 200, max: 1, desc: 'Begin with 1 guard post' },
+  { key: 'START_SOLDIER',    label: 'Start: Soldier', cost: 120, max: 1, desc: 'Begin with 1 soldier bee escort' },
+  { key: 'SOLDIER_DMG_META', label: 'Soldier Damage', cost: 100, max: 3, desc: '+1 soldier damage per level' },
 ];
 
 export default class MetaUpgradeScene extends Phaser.Scene {
@@ -28,7 +30,7 @@ export default class MetaUpgradeScene extends Phaser.Scene {
 
     this._rows = [];
     UPGRADES.forEach((def, i) => {
-      const y = 165 + i * 62;
+      const y = 155 + i * 54;
 
       const nameText = this.add.text(200, y, def.label, {
         fontSize: '22px', color: '#ffffff',
@@ -57,7 +59,7 @@ export default class MetaUpgradeScene extends Phaser.Scene {
       this._rows.push({ def, nameText, descText, levelText, btn });
     });
 
-    const backBtn = this.add.text(cx, 680, '[ BACK TO MENU ]', {
+    const backBtn = this.add.text(cx, 710, '[ BACK TO MENU ]', {
       fontSize: '28px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 

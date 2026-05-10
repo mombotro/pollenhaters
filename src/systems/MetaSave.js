@@ -12,6 +12,8 @@ function DEFAULTS() {
       START_ARMOR:       0,
       START_HONEY:       0,
       START_GUARD:       0,
+      START_SOLDIER:     0,
+      SOLDIER_DMG_META:  0,
     },
     highScore: 0,
     lastRun: null,

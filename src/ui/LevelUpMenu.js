@@ -13,6 +13,8 @@ const LABELS = {
   HIVE_PRODUCTION:  'Honey Rate',
   HIVE_HP:          'Hive Max HP',
   HIVE_WORKERS:     'Free Worker',
+  SOLDIER_DMG:      'Soldier Damage',
+  SOLDIER_RATE:     'Soldier Attack Speed',
 };
 
 export default class LevelUpMenu {

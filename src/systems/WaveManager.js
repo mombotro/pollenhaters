@@ -12,7 +12,7 @@ export default class WaveManager {
     if (elapsed < this._nextWaveAt) return null;
 
     this._waveNumber++;
-    this._nextWaveAt = elapsed + this._waveInterval;
+    this._nextWaveAt += this._waveInterval;
 
     const n = this._waveNumber;
     const total = this._baseCount + (n - 1) * this._countIncrement;

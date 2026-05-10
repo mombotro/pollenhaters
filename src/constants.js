@@ -84,6 +84,7 @@ export const TOWER = {
   RESIN_TRAP_RADIUS: 60,
   RESIN_TRAP_SLOW: 0.4,        // speed multiplier for slowed wasps
   RESIN_TRAP_DURATION: 3000,   // ms slow lasts
+  RESIN_TRAP_USES: 3,          // wasps slowed before trap breaks
   GUARD_POST_COST: 50,
   GUARD_POST_HP: 3,             // hits before guard post is destroyed
   GUARD_BEE_HP: 4,
@@ -130,8 +131,18 @@ export const WIND = {
   LERP_RATE: 0.004,      // per-frame lerp rate toward new wind target (~12s to fully shift)
 };
 
+export const SOLDIER = {
+  SPEED: 200,
+  ORBIT_RADIUS: 65,
+  DAMAGE: 1,
+  RANGE: 160,
+  FIRE_RATE: 1000,   // ms between shots
+  COST: 35,          // honey to recruit
+  HP: 4,
+};
+
 export const WASP_HIVE = {
-  HP: 30,
+  HP: 100,
   REGEN_INTERVAL: 10000,
   REGEN_BASE: 0.5,
   REGEN_PER_HONEY: 0.1,
@@ -145,5 +156,6 @@ export const BREAKABLE = {
 
 export const PICKUP = {
   HEAL_AMOUNT: 1,        // hp restored
+  HONEY_AMOUNT: 5,       // honey restored when recovered from killed carrier
   LIFETIME: 15000,       // ms before pickup disappears
 };

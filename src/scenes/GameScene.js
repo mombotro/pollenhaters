@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { WORLD, BEE, HIVE, WASP, WAVE, FLOWER, TIMER, WORKER, TOWER, XP, BUTTERFLY, SPIDER, WEB, WIND, BREAKABLE, pickFlowerType } from '../constants.js';
+import { WORLD, BEE, HIVE, WASP, WAVE, FLOWER, TIMER, WORKER, TOWER, XP, BUTTERFLY, SPIDER, WEB, WIND, BREAKABLE, SOLDIER, PICKUP, pickFlowerType } from '../constants.js';
 import MetaSave from '../systems/MetaSave.js';
 import Flower from '../entities/Flower.js';
 import Hive from '../entities/Hive.js';
@@ -11,6 +11,8 @@ import Stinger from '../entities/Stinger.js';
 import WorkerBee from '../entities/WorkerBee.js';
 import WaveManager from '../systems/WaveManager.js';
 import WaspHiveSystem from '../systems/WaspHiveSystem.js';
+import HunterWasp from '../entities/HunterWasp.js';
+import RaiderWasp from '../entities/RaiderWasp.js';
 import ResinTrap from '../towers/ResinTrap.js';
 import GuardPost from '../towers/GuardPost.js';
 import Pickup from '../entities/Pickup.js';
@@ -23,6 +25,7 @@ import WindSystem from '../systems/WindSystem.js';
 import Butterfly from '../entities/Butterfly.js';
 import Spider from '../entities/Spider.js';
 import WebTrap from '../entities/WebTrap.js';
+import SoldierBee from '../entities/SoldierBee.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() { super('GameScene'); }
@@ -36,6 +39,7 @@ export default class GameScene extends Phaser.Scene {
     this.xp = 0;
     this.level = 1;
     this.reqXp = XP.BASE_REQ;
+    this._playground = data.playground ?? false;
   }
 
   create() {
@@ -50,6 +54,7 @@ export default class GameScene extends Phaser.Scene {
     this.pickups = this.physics.add.group();
     this.breakables = this.physics.add.group();
     this._towerList = [];
+    this.soldiers = this.physics.add.group();
     this.butterflies = this.physics.add.group();
     this.spiders = this.physics.add.group();
     this._webList = [];
@@ -172,7 +177,8 @@ export default class GameScene extends Phaser.Scene {
     const _metaSave = MetaSave.load();
     const _u = _metaSave.upgrades;
 
-    if (_u.BEE_SPEED_META)    this.player._speed += _u.BEE_SPEED_META * 20;
+    this._metaSpeedBonus = (_u.BEE_SPEED_META ?? 0) * 20;
+    if (this._metaSpeedBonus)  this.player._speed += this._metaSpeedBonus;
     if (_u.BEE_HP_META)       { this.player.maxHp += _u.BEE_HP_META * 2; this.player.hp = this.player.maxHp; }
     if (_u.HIVE_HP_META)      { this.hive.maxHp   += _u.HIVE_HP_META * 5; this.hive.hp  = this.hive.maxHp; }
     if (_u.HIVE_STORAGE_META) this.resources.setHoneyStorage(HIVE.HONEY_STORAGE + _u.HIVE_STORAGE_META * 50);
@@ -182,17 +188,20 @@ export default class GameScene extends Phaser.Scene {
       _w.init(this.hive, this.flowers);
       this.workers.add(_w);
     }
+    this._metaSoldierDmg = _u.SOLDIER_DMG_META ?? 0;
+
     if (_u.START_ARMOR)  this.player.armor = 1;
     if (_u.START_HONEY)  { this.resources.addPendingSap(30); this.resources.convertSap(30); }
     if (_u.START_GUARD)  {
       const _post = new GuardPost(this, this.hiveX + 80, this.hiveY);
       this._towerList.push(_post);
     }
+    if (_u.START_SOLDIER) this._recruitSoldier(true);
 
     this.physics.add.overlap(this.stingers, this.wasps, (stinger, wasp) => {
       stinger.release();
       if (wasp.takeDamage(stinger.damage)) {
-        this._dropPickup(wasp.x, wasp.y, 'xp');
+        this._dropPickup(wasp.x, wasp.y, wasp.honeyCarried ? 'honey' : 'xp');
       }
     });
 
@@ -232,10 +241,10 @@ export default class GameScene extends Phaser.Scene {
 
       // Dash attack logic
       if (bee.isDashing) {
-        if (now - (wasp.lastDashedHit || 0) < 500) return; // Prevent multi-hits during same dash
+        if (now - (wasp.lastDashedHit || 0) < 500) return;
         wasp.lastDashedHit = now;
         if (wasp.takeDamage(1)) {
-          this._dropPickup(wasp.x, wasp.y, 'xp');
+          this._dropPickup(wasp.x, wasp.y, wasp.honeyCarried ? 'honey' : 'xp');
         }
         return;
       }
@@ -264,7 +273,7 @@ export default class GameScene extends Phaser.Scene {
 
       if (this.resources.getHoney() > 0) {
         this.resources.stealHoney(WASP.HONEY_STEAL);
-        this.waspHiveSystem.onHoneyStolen(WASP.HONEY_STEAL);
+        wasp.honeyCarried = WASP.HONEY_STEAL;
         wasp.retreat();
       } else {
         if (hive.takeDamage(WASP.DAMAGE)) this._endGame(false);
@@ -279,6 +288,8 @@ export default class GameScene extends Phaser.Scene {
     this.buildMenu = new BuildMenu(this, (key) => {
       if (key === 'recruit-worker') {
         this._recruitWorker();
+      } else if (key === 'recruit-soldier') {
+        this._recruitSoldier();
       } else {
         this._enterPlacementMode(key);
       }
@@ -294,6 +305,8 @@ export default class GameScene extends Phaser.Scene {
     this.hud = new HUD(this, this.resources, this.hive, this.player, this.wind);
     this._touchControls = new TouchControls(this, this.player);
     this._spawnPassiveEntities();
+
+    if (this._playground) this._createPlaygroundUI();
   }
 
   update(time, delta) {
@@ -316,7 +329,7 @@ export default class GameScene extends Phaser.Scene {
     const workerCount = this.workers.getChildren().filter(w => w.alive).length;
     if (this.hud) this.hud.update(this._playTime, this.waveManager.getWaveNumber(), workerCount, this.level, this.xp, this.reqXp, this.waspHiveSystem.honeyStolen);
 
-    if (this._playTime >= TIMER.RUN_DURATION) {
+    if (!this._playground && this._playTime >= TIMER.RUN_DURATION) {
       this._endGame(true);
       return;
     }
@@ -331,6 +344,18 @@ export default class GameScene extends Phaser.Scene {
 
     this.wasps.getChildren().forEach(w => w.update(this._gameTime, windVec));
 
+    // Wasps steal dropped honey from the ground
+    this.wasps.getChildren().forEach(wasp => {
+      if (!wasp.active) return;
+      this.pickups.getChildren().forEach(pickup => {
+        if (!pickup.active || pickup.type !== 'honey') return;
+        if (Phaser.Math.Distance.Between(wasp.x, wasp.y, pickup.x, pickup.y) < 30) {
+          this.waspHiveSystem.onHoneyStolen(PICKUP.HONEY_AMOUNT);
+          pickup.release();
+        }
+      });
+    });
+
     this.workers.getChildren().forEach(w => {
       if (w.alive) w.update(this._gameTime, scaledDelta, this.resources);
     });
@@ -338,6 +363,11 @@ export default class GameScene extends Phaser.Scene {
     this._towerList.forEach(tower => {
       if (tower.towerType === 'resin')  tower.update(this._gameTime, this.wasps);
       else if (tower.towerType === 'guard' && tower.active) tower.guard.update(this._gameTime, this.wasps, this.stingers);
+    });
+
+    // Soldiers
+    this.soldiers.getChildren().forEach(s => {
+      if (s.alive) s.update(this._gameTime, this.player, this.wasps, this.breakables, this.stingers);
     });
 
     // Butterflies
@@ -377,8 +407,10 @@ export default class GameScene extends Phaser.Scene {
       this.resources.convertSap(100);
     }
 
-    const wave = this.waveManager.update(this._playTime);
-    if (wave) this.waspHiveSystem.spawnWave(wave);
+    if (!this._playground) {
+      const wave = this.waveManager.update(this._playTime);
+      if (wave) this.waspHiveSystem.spawnWave(wave);
+    }
     this.waspHiveSystem.update(this._gameTime);
     this._touchControls.update();
   }
@@ -483,6 +515,12 @@ export default class GameScene extends Phaser.Scene {
           worker.takeDamage(WASP.DAMAGE);
         }
       });
+      this.soldiers.getChildren().forEach(soldier => {
+        if (!soldier.active || !soldier.alive) return;
+        if (Phaser.Math.Distance.Between(wasp.x, wasp.y, soldier.x, soldier.y) > 30) return;
+        wasp.lastHit = time;
+        soldier.takeDamage(WASP.DAMAGE);
+      });
     });
   }
 
@@ -505,6 +543,14 @@ export default class GameScene extends Phaser.Scene {
     const w = new WorkerBee(this, this.hiveX, this.hiveY);
     w.init(this.hive, this.flowers);
     this.workers.add(w);
+  }
+
+  _recruitSoldier(free = false) {
+    if (!free && !this.resources.spendHoney(SOLDIER.COST)) return;
+    const s = new SoldierBee(this, this.hiveX, this.hiveY);
+    s.damage = SOLDIER.DAMAGE + (this._metaSoldierDmg ?? 0) + this.upgrades.getLevel('SOLDIER_DMG');
+    s.fireRate = Math.max(400, SOLDIER.FIRE_RATE - this.upgrades.getLevel('SOLDIER_RATE') * 100);
+    this.soldiers.add(s);
   }
 
   _enterPlacementMode(towerKey) {
@@ -552,7 +598,7 @@ export default class GameScene extends Phaser.Scene {
     const lvl = this.upgrades.getLevel(key);
     switch (key) {
       case 'BEE_SPEED':
-        this.player._speed = BEE.SPEED + lvl * 20;
+        this.player._speed = BEE.SPEED + (this._metaSpeedBonus ?? 0) + lvl * 20;
         break;
       case 'BEE_CAPACITY':
         this.player._sapCapacity = BEE.SAP_CAPACITY + lvl * 3;
@@ -595,6 +641,64 @@ export default class GameScene extends Phaser.Scene {
         w.init(this.hive, this.flowers);
         this.workers.add(w);
         break;
+      case 'SOLDIER_DMG':
+        this.soldiers.getChildren().forEach(s => {
+          s.damage = SOLDIER.DAMAGE + (this._metaSoldierDmg ?? 0) + lvl;
+        });
+        break;
+      case 'SOLDIER_RATE':
+        this.soldiers.getChildren().forEach(s => {
+          s.fireRate = Math.max(400, SOLDIER.FIRE_RATE - lvl * 100);
+        });
+        break;
+    }
+  }
+
+  _createPlaygroundUI() {
+    const s = { fontSize: '20px', color: '#ffffff', stroke: '#000000', strokeThickness: 4, fontFamily: 'monospace' };
+    const hs = { ...s, fontSize: '16px', color: '#ffdd44' };
+
+    this.add.text(640, 16, 'PLAYGROUND MODE', hs)
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(200);
+
+    const btnHunter = this.add.text(430, 660, '[ Spawn Hunter ]', s)
+      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
+    btnHunter.on('pointerover', () => btnHunter.setColor('#ffaa00'));
+    btnHunter.on('pointerout',  () => btnHunter.setColor('#ffffff'));
+    btnHunter.on('pointerdown', () => this._spawnPlaygroundWasp('hunter'));
+
+    const btnRaider = this.add.text(640, 660, '[ Spawn Raider ]', s)
+      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
+    btnRaider.on('pointerover', () => btnRaider.setColor('#ff6600'));
+    btnRaider.on('pointerout',  () => btnRaider.setColor('#ffffff'));
+    btnRaider.on('pointerdown', () => this._spawnPlaygroundWasp('raider'));
+
+    const btnHoney = this.add.text(850, 660, '[ Max Honey ]', s)
+      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
+    btnHoney.on('pointerover', () => btnHoney.setColor('#ffdd00'));
+    btnHoney.on('pointerout',  () => btnHoney.setColor('#ffffff'));
+    btnHoney.on('pointerdown', () => {
+      const cap = this.resources.getHoneyStorage();
+      this.resources.addHoney(cap);
+    });
+
+    const btnBack = this.add.text(1060, 660, '[ Exit ]', s)
+      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
+    btnBack.on('pointerover', () => btnBack.setColor('#ff4444'));
+    btnBack.on('pointerout',  () => btnBack.setColor('#ffffff'));
+    btnBack.on('pointerdown', () => this.scene.start('MenuScene'));
+  }
+
+  _spawnPlaygroundWasp(type) {
+    const hx = this.waspHiveSystem.hive.x;
+    const hy = this.waspHiveSystem.hive.y;
+    if (type === 'hunter') {
+      const w = new HunterWasp(this, hx, hy);
+      w.setTarget(this.player);
+      this.wasps.add(w);
+    } else {
+      const w = new RaiderWasp(this, hx, hy, this.hive, this.hive, this.waspHiveSystem.hive);
+      this.wasps.add(w);
     }
   }
 

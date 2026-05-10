@@ -51,6 +51,10 @@ export default class ResourceManager {
     this._honeyStorage = cap;
   }
 
+  addHoney(amount) {
+    this._honey = Math.min(this._honey + amount, this._honeyStorage);
+  }
+
   addPendingSap(amount) {
     this._pendingSap += amount;
   }

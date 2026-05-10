@@ -12,7 +12,7 @@ export default class Pickup extends Phaser.Physics.Arcade.Sprite {
 
   fire(x, y, type) {
     this.type = type;
-    this.setTexture(type === 'health' ? 'health-pickup' : 'xp-gem');
+    this.setTexture(type === 'health' ? 'health-pickup' : type === 'honey' ? 'honey-drop' : 'xp-gem');
     this.setPosition(x, y).setActive(true).setVisible(true);
     if (this.body) this.body.setEnable(true);
     this.body.reset(x, y);
@@ -34,6 +34,8 @@ export default class Pickup extends Phaser.Physics.Arcade.Sprite {
       scene.time.delayedCall(150, () => { if (player.active) player.clearTint(); });
     } else if (this.type === 'xp') {
       scene._collectXp(XP.WASP_KILL);
+    } else if (this.type === 'honey') {
+      scene.resources.addHoney(PICKUP.HONEY_AMOUNT);
     }
     this.release();
     return true;

@@ -11,6 +11,7 @@ export default class HunterWasp extends Phaser.Physics.Arcade.Sprite {
     this._target = null;
     this.lastHit = 0;
     this.slowedUntil = 0;
+    this.honeyCarried = 0;
     this.setDrag(800, 800);
   }
 
@@ -50,7 +51,12 @@ export default class HunterWasp extends Phaser.Physics.Arcade.Sprite {
       } else {
         this.setAcceleration(0, 0);
       }
-      if (this.x < -200 || this.x > 3000 || this.y < -200 || this.y > 2000) {
+      if (this.honeyCarried > 0) {
+        if (dist < 50) {
+          this.scene.waspHiveSystem.onHoneyStolen(this.honeyCarried);
+          this.destroy();
+        }
+      } else if (this.x < -200 || this.x > 3000 || this.y < -200 || this.y > 2000) {
         this.destroy();
       }
       return;
@@ -118,10 +124,15 @@ export default class HunterWasp extends Phaser.Physics.Arcade.Sprite {
 
   retreat() {
     this.isRetreating = true;
-    const angle = Phaser.Math.Angle.Between(this.scene.hive.x, this.scene.hive.y, this.x, this.y);
-    this.retreatTarget = {
-      x: this.x + Math.cos(angle) * 2000,
-      y: this.y + Math.sin(angle) * 2000,
-    };
+    if (this.honeyCarried > 0 && this.scene.waspHiveSystem) {
+      const wh = this.scene.waspHiveSystem.hive;
+      this.retreatTarget = { x: wh.x, y: wh.y };
+    } else {
+      const angle = Phaser.Math.Angle.Between(this.scene.hive.x, this.scene.hive.y, this.x, this.y);
+      this.retreatTarget = {
+        x: this.x + Math.cos(angle) * 2000,
+        y: this.y + Math.sin(angle) * 2000,
+      };
+    }
   }
 }
