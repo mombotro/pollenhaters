@@ -16,6 +16,7 @@ export default class WaspHiveSystem {
 
     const { x, y } = this._randomPosition(playerHiveX, playerHiveY);
     this._hive = new WaspHive(scene, x, y);
+    this._hive.onDamaged = () => this.spawnOnDamage();
   }
 
   get hive() { return this._hive; }
@@ -39,6 +40,16 @@ export default class WaspHiveSystem {
       }
       this._scene.wasps.add(w);
     }
+  }
+
+  spawnOnDamage() {
+    if (this._hive.hp <= 0) return;
+    const w = new HunterWasp(this._scene, this._hive.x, this._hive.y);
+    w.setTarget(this._scene.player);
+    if (Math.random() < WaspHiveSystem.powerChance(this._totalHoneyStolen)) {
+      w.hp = 2; w._speedMult = 1.25;
+    }
+    this._scene.wasps.add(w);
   }
 
   update(time) {

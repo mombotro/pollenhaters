@@ -26,10 +26,12 @@ export default class WaspHive extends Phaser.Physics.Arcade.Sprite {
   }
 
   takeDamage(amount) {
+    if (this.hp <= 0) return true;
     this.hp = Math.max(0, this.hp - amount);
     this.setTint(0xff4444);
     this.scene.time.delayedCall(150, () => { if (this.active) this.clearTint(); });
     this._drawBar();
+    if (this.onDamaged) this.onDamaged();
     return this.hp <= 0;
   }
 

@@ -37,7 +37,6 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
 
   update(time, delta) {
     if (!this.alive) return;
-    this._readGamepad();
 
     if (this.isDashing) {
       if (time >= this.dashEndTime) {
@@ -75,7 +74,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    // Right-click aim: compute angle in screen space (avoids worldX quirks)
+    // Aim: mouse right-click first, then gamepad right stick can override
     const ptr = this.scene.input.mousePointer;
     if (ptr && ptr.rightButtonDown()) {
       const cam = this.scene.cameras.main;
@@ -85,6 +84,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     } else {
       this._aimAngle = null;
     }
+    this._readGamepad();
 
     if (this.isDashing) {
       this.setMaxVelocity(this._speed * BEE.DASH_SPEED_MULTIPLIER, this._speed * BEE.DASH_SPEED_MULTIPLIER);

@@ -93,7 +93,7 @@ export default class GameScene extends Phaser.Scene {
       this.hiveX,
       this.hiveY + 80,
       (x, y, range, damage, speed, backwardAngle) => {
-        // Only fire if an enemy is within range (any direction)
+        // Only fire if an enemy is within range
         let hasTarget = false;
         for (const w of this.wasps.getChildren()) {
           if (w.active && Phaser.Math.Distance.Between(x, y, w.x, w.y) < range) { hasTarget = true; break; }
