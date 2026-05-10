@@ -66,6 +66,7 @@ export default class TouchControls {
       this._aimPtr = ptr;
       this._aimOriginX = x;
       this._aimOriginY = y;
+      this._player._touchAimActive = true;
     }
   }
 
@@ -99,6 +100,7 @@ export default class TouchControls {
     }
     if (ptr === this._aimPtr) {
       this._aimPtr = null;
+      this._player._touchAimActive = false;
       this._player._aimAngle = null;
     }
   }

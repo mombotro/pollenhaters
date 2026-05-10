@@ -30,6 +30,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     this._space = scene.input.keyboard.addKey('SPACE');
     this._touchAxis = { x: 0, y: 0 };
     this._touchDash = false;
+    this._touchAimActive = false;
     this._aimAngle = null;
     this._gpAxis = { x: 0, y: 0 };
     this._gpAWasDown = false;
@@ -74,14 +75,14 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    // Aim: mouse right-click first, then gamepad right stick can override
+    // Aim: mouse right-click first, then touch/gamepad can set if mouse not active
     const ptr = this.scene.input.mousePointer;
     if (ptr && ptr.rightButtonDown()) {
       const cam = this.scene.cameras.main;
       const beeScreenX = (this.x - cam.scrollX) * cam.zoom;
       const beeScreenY = (this.y - cam.scrollY) * cam.zoom;
       this._aimAngle = Math.atan2(ptr.y - beeScreenY, ptr.x - beeScreenX);
-    } else {
+    } else if (!this._touchAimActive) {
       this._aimAngle = null;
     }
     this._readGamepad();
