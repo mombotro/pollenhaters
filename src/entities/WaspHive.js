@@ -15,6 +15,9 @@ export default class WaspHive extends Phaser.Physics.Arcade.Sprite {
   }
 
   _drawBar() {
+    const ratio = this.hp / this.maxHp;
+    if (ratio === this._barRatio) return;
+    this._barRatio = ratio;
     const W = 60, H = 7;
     const x = this.x - W / 2;
     const y = this.y - 42;
@@ -22,7 +25,7 @@ export default class WaspHive extends Phaser.Physics.Arcade.Sprite {
     this._bar.fillStyle(0x222222);
     this._bar.fillRect(x, y, W, H);
     this._bar.fillStyle(0xff4400);
-    this._bar.fillRect(x, y, W * (this.hp / this.maxHp), H);
+    this._bar.fillRect(x, y, W * ratio, H);
   }
 
   takeDamage(amount) {

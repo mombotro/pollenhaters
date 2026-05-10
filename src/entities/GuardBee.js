@@ -34,9 +34,12 @@ export default class GuardBee extends Phaser.Physics.Arcade.Sprite {
       if (d < nearestDist) { nearest = w; nearestDist = d; }
     });
     if (!nearest) return;
-    const s = new Stinger(this.scene, this.x, this.y, TOWER.GUARD_BEE_DAMAGE);
-    stingers.add(s);
-    s.launch(nearest.x, nearest.y);
+    let s = stingers.getFirstDead(false);
+    if (!s) {
+      s = new Stinger(this.scene, 0, 0);
+      stingers.add(s);
+    }
+    s.fire(this.x, this.y, TOWER.GUARD_BEE_DAMAGE, null, null, nearest.x, nearest.y);
     this._lastFired = time;
   }
 

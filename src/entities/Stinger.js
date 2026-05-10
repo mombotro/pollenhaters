@@ -2,24 +2,34 @@ import Phaser from 'phaser';
 import { BEE } from '../constants.js';
 
 export default class Stinger extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, damage = BEE.STINGER_DAMAGE, maxDist = BEE.STINGER_RANGE, speed = BEE.STINGER_SPEED) {
+  constructor(scene, x, y) {
     super(scene, x, y, 'stinger');
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.damage = damage;
-    this._maxDist = maxDist || BEE.STINGER_RANGE;
-    this._speed = speed || BEE.STINGER_SPEED;
+    this.damage = BEE.STINGER_DAMAGE;
+    this._lifetimeEvent = null;
+    this.setActive(false).setVisible(false);
   }
 
-  // Called after group.add() so world.enable() has run and body is stable
-  launch(targetX, targetY) {
-    const angleRad = Phaser.Math.Angle.Between(this.x, this.y, targetX, targetY);
+  fire(x, y, damage, maxDist, speed, targetX, targetY) {
+    this.damage = damage ?? BEE.STINGER_DAMAGE;
+    const dist  = maxDist ?? BEE.STINGER_RANGE;
+    const spd   = speed   ?? BEE.STINGER_SPEED;
+    this.setPosition(x, y).setActive(true).setVisible(true);
+    this.body.reset(x, y);
+    const angleRad = Phaser.Math.Angle.Between(x, y, targetX, targetY);
     this.setRotation(angleRad);
-    this.body.setVelocity(
-      Math.cos(angleRad) * this._speed,
-      Math.sin(angleRad) * this._speed
+    this.body.setVelocity(Math.cos(angleRad) * spd, Math.sin(angleRad) * spd);
+    if (this._lifetimeEvent) this._lifetimeEvent.remove(false);
+    this._lifetimeEvent = this.scene.time.delayedCall(
+      (dist / spd) * 1000,
+      () => this.release(),
     );
-    const lifetime = (this._maxDist / this._speed) * 1000;
-    this.scene.time.delayedCall(lifetime, () => { if (this.active) this.destroy(); });
+  }
+
+  release() {
+    if (this._lifetimeEvent) { this._lifetimeEvent.remove(false); this._lifetimeEvent = null; }
+    this.setActive(false).setVisible(false);
+    if (this.body) this.body.setVelocity(0, 0);
   }
 }

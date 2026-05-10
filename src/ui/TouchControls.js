@@ -11,14 +11,18 @@ export default class TouchControls {
     this._dashPtr = null;
     this._joyOriginX = 0;
     this._joyOriginY = 0;
+    this._joyWasActive = false;
 
     scene.input.addPointer(1);
 
     this._hasTouch = false;
-    this._gfx = scene.add.graphics().setScrollFactor(0).setDepth(200);
+    // Static layer drawn once on first touch
+    this._staticGfx = scene.add.graphics().setScrollFactor(0).setDepth(200);
+    // Dynamic layer redrawn only when joystick is active
+    this._gfx = scene.add.graphics().setScrollFactor(0).setDepth(201);
     this._label = scene.add.text(DASH_CX, DASH_CY, 'DASH', {
       fontSize: '18px', color: '#ffffff', fontStyle: 'bold',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0.75).setVisible(false);
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(202).setAlpha(0.75).setVisible(false);
 
     scene.input.on('pointerdown',      this._onDown, this);
     scene.input.on('pointermove',      this._onMove, this);
@@ -26,11 +30,19 @@ export default class TouchControls {
     scene.input.on('pointerupoutside', this._onUp,   this);
   }
 
+  _drawDashButton() {
+    this._staticGfx.fillStyle(0xffaa00, 0.45);
+    this._staticGfx.fillCircle(DASH_CX, DASH_CY, DASH_R);
+    this._staticGfx.lineStyle(2, 0xffffff, 0.5);
+    this._staticGfx.strokeCircle(DASH_CX, DASH_CY, DASH_R);
+    this._label.setVisible(true);
+  }
+
   _onDown(ptr) {
     if (!ptr.wasTouch) return;
     if (!this._hasTouch) {
       this._hasTouch = true;
-      this._label.setVisible(true);
+      this._drawDashButton();
     }
     const { x, y } = ptr;
     if (Math.hypot(x - DASH_CX, y - DASH_CY) <= DASH_R) {
@@ -73,26 +85,23 @@ export default class TouchControls {
   }
 
   update() {
+    const hasJoy = this._joyPtr !== null;
+    if (!hasJoy && !this._joyWasActive) return;
+    this._joyWasActive = hasJoy;
+
     this._gfx.clear();
-    if (!this._hasTouch) return;
+    if (!hasJoy) return;
 
-    this._gfx.fillStyle(0xffaa00, 0.45);
-    this._gfx.fillCircle(DASH_CX, DASH_CY, DASH_R);
-    this._gfx.lineStyle(2, 0xffffff, 0.5);
-    this._gfx.strokeCircle(DASH_CX, DASH_CY, DASH_R);
-
-    if (this._joyPtr) {
-      const ax = this._player._touchAxis.x;
-      const ay = this._player._touchAxis.y;
-      this._gfx.lineStyle(3, 0xffffff, 0.4);
-      this._gfx.strokeCircle(this._joyOriginX, this._joyOriginY, JOY_MAX_R);
-      this._gfx.fillStyle(0xffffff, 0.5);
-      this._gfx.fillCircle(
-        this._joyOriginX + ax * JOY_MAX_R,
-        this._joyOriginY + ay * JOY_MAX_R,
-        22,
-      );
-    }
+    const ax = this._player._touchAxis.x;
+    const ay = this._player._touchAxis.y;
+    this._gfx.lineStyle(3, 0xffffff, 0.4);
+    this._gfx.strokeCircle(this._joyOriginX, this._joyOriginY, JOY_MAX_R);
+    this._gfx.fillStyle(0xffffff, 0.5);
+    this._gfx.fillCircle(
+      this._joyOriginX + ax * JOY_MAX_R,
+      this._joyOriginY + ay * JOY_MAX_R,
+      22,
+    );
   }
 
   destroy() {
@@ -100,6 +109,7 @@ export default class TouchControls {
     this._scene.input.off('pointermove',      this._onMove, this);
     this._scene.input.off('pointerup',        this._onUp,   this);
     this._scene.input.off('pointerupoutside', this._onUp,   this);
+    this._staticGfx.destroy();
     this._gfx.destroy();
     this._label.destroy();
   }

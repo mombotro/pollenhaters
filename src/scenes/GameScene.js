@@ -109,12 +109,13 @@ export default class GameScene extends Phaser.Scene {
         }
         if (!hasTarget) return false;
 
-        // Spawn stinger at bee's tail, fire backward
         const spawnX = x + Math.cos(backwardAngle) * 14;
         const spawnY = y + Math.sin(backwardAngle) * 14;
-        const s = new Stinger(this, spawnX, spawnY, damage, range, speed);
-        this.stingers.add(s);
-        s.launch(spawnX + Math.cos(backwardAngle) * range, spawnY + Math.sin(backwardAngle) * range);
+        let s = this.stingers.getFirstDead(false);
+        if (!s) { s = new Stinger(this, 0, 0); this.stingers.add(s); }
+        s.fire(spawnX, spawnY, damage, range, speed,
+               spawnX + Math.cos(backwardAngle) * range,
+               spawnY + Math.sin(backwardAngle) * range);
         return true;
       },
     );
@@ -147,7 +148,7 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.physics.add.overlap(this.stingers, this.breakables, (stinger, breakable) => {
-      stinger.destroy();
+      stinger.release();
       breakable.takeDamage(stinger.damage);
     });
 
@@ -189,14 +190,14 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.physics.add.overlap(this.stingers, this.wasps, (stinger, wasp) => {
-      stinger.destroy();
+      stinger.release();
       if (wasp.takeDamage(stinger.damage)) {
         this._dropPickup(wasp.x, wasp.y, 'xp');
       }
     });
 
     this.physics.add.overlap(this.waspHiveSystem.hive, this.stingers, (waspHive, stinger) => {
-      stinger.destroy();
+      stinger.release();
       this.waspHiveSystem.onHiveAttacked(this._gameTime);
       if (waspHive.takeDamage(stinger.damage)) {
         this._endGame(true, true);
@@ -383,8 +384,9 @@ export default class GameScene extends Phaser.Scene {
   }
 
   _dropPickup(x, y, type) {
-    const pickup = new Pickup(this, x, y, type);
-    this.pickups.add(pickup);
+    let p = this.pickups.getFirstDead(false);
+    if (!p) { p = new Pickup(this, x, y); this.pickups.add(p); }
+    p.fire(x, y, type);
   }
 
   _collectXp(val) {
@@ -470,11 +472,10 @@ export default class GameScene extends Phaser.Scene {
   _checkWorkerHunterCollisions(time) {
     this.wasps.getChildren().forEach(wasp => {
       if (!wasp.active || wasp.waspType !== 'hunter') return;
+      if (time - wasp.lastHit < WASP.HIT_COOLDOWN) return;
       this.workers.getChildren().forEach(worker => {
         if (!worker.active || !worker.alive) return;
-        const dist = Phaser.Math.Distance.Between(wasp.x, wasp.y, worker.x, worker.y);
-        if (dist > 20) return;
-        if (time - wasp.lastHit < WASP.HIT_COOLDOWN) return;
+        if (Phaser.Math.Distance.Between(wasp.x, wasp.y, worker.x, worker.y) > 20) return;
         wasp.lastHit = time;
         if (worker._sap > 0) {
           worker._sap = Math.max(0, worker._sap - WASP.SAP_STEAL);
@@ -488,11 +489,10 @@ export default class GameScene extends Phaser.Scene {
   _checkRaiderTowerCollisions(time) {
     this.wasps.getChildren().forEach(wasp => {
       if (!wasp.active || wasp.waspType !== 'raider' || wasp.isRetreating) return;
+      if (time - wasp.lastHit < WASP.HIT_COOLDOWN) return;
       this._towerList.forEach(tower => {
         if (!tower.active || tower.towerType !== 'guard' || tower.hp <= 0) return;
-        const dist = Phaser.Math.Distance.Between(wasp.x, wasp.y, tower.x, tower.y);
-        if (dist > 32) return;
-        if (time - wasp.lastHit < WASP.HIT_COOLDOWN) return;
+        if (Phaser.Math.Distance.Between(wasp.x, wasp.y, tower.x, tower.y) > 32) return;
         wasp.lastHit = time;
         tower.takeDamage(WASP.DAMAGE);
         wasp.retreat();
