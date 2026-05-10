@@ -6,7 +6,7 @@ export default class MenuScene extends Phaser.Scene {
   create() {
     const cx = 640, cy = 360;
 
-    this.add.dom(cx, cy - 210).createFromHTML(
+    this.add.dom(cx, cy - 310).createFromHTML(
       '<img src="bee.gif" style="width:180px;height:auto;display:block;">'
     );
 
