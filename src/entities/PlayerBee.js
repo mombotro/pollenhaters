@@ -30,7 +30,9 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     this._space = scene.input.keyboard.addKey('SPACE');
     this._touchAxis = { x: 0, y: 0 };
     this._touchDash = false;
-    this._aimAngle = null; // non-null when right-click held
+    this._aimAngle = null;
+    this._gpAxis = { x: 0, y: 0 };
+    this._gpAWasDown = false;
   }
 
   update(time, delta) {
@@ -70,6 +72,8 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
+    this._readGamepad();
+
     // Right-click aim: compute angle in screen space (avoids worldX quirks)
     const ptr = this.scene.input.mousePointer;
     if (ptr && ptr.rightButtonDown()) {
@@ -92,6 +96,38 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     this._autoFire(time);
   }
 
+  _readGamepad() {
+    const pad = this.scene.input.gamepad?.getPad(0);
+    this._gpAxis = { x: 0, y: 0 };
+    if (!pad) return;
+
+    const DEAD = 0.15;
+
+    // Left stick + D-pad movement
+    let gx = Math.abs(pad.leftStick.x) > DEAD ? pad.leftStick.x : 0;
+    let gy = Math.abs(pad.leftStick.y) > DEAD ? pad.leftStick.y : 0;
+    if (pad.left?.pressed)  gx = -1;
+    if (pad.right?.pressed) gx =  1;
+    if (pad.up?.pressed)    gy = -1;
+    if (pad.down?.pressed)  gy =  1;
+    const len = Math.hypot(gx, gy);
+    if (len > 1) { gx /= len; gy /= len; }
+    this._gpAxis = { x: gx, y: gy };
+
+    // A button → dash (rising edge)
+    const aDown = pad.A?.pressed ?? false;
+    if (aDown && !this._gpAWasDown) this._touchDash = true;
+    this._gpAWasDown = aDown;
+
+    // Hold RT + right stick → aim
+    const rt = pad.R2?.value ?? 0;
+    const rx = pad.rightStick.x;
+    const ry = pad.rightStick.y;
+    if (rt > 0.5 && Math.hypot(rx, ry) > DEAD) {
+      this._aimAngle = Math.atan2(ry, rx);
+    }
+  }
+
   _move() {
     const left  = this._cursors.left.isDown  || this._wasd.A.isDown;
     const right = this._cursors.right.isDown || this._wasd.D.isDown;
@@ -102,8 +138,8 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     let ay = (down  ? 1 : 0) - (up   ? 1 : 0);
 
     if (ax === 0 && ay === 0) {
-      ax = this._touchAxis.x;
-      ay = this._touchAxis.y;
+      ax = this._touchAxis.x || this._gpAxis.x;
+      ay = this._touchAxis.y || this._gpAxis.y;
     } else if (ax !== 0 && ay !== 0) {
       ax *= 0.707; ay *= 0.707;
     }
@@ -112,7 +148,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     this.setAcceleration(ax * accel, ay * accel);
 
     if (this._aimAngle !== null) {
-      this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, this._aimAngle + Math.PI / 2, 0.15);
+      this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, this._aimAngle - Math.PI / 2, 0.15);
     } else if (this.body.velocity.lengthSq() > 10) {
       const targetRotation = this.body.velocity.angle() + Math.PI / 2;
       this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.15);
@@ -121,14 +157,11 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
 
   _autoFire(time) {
     if (!this._onFire || time - this._lastFired < this._stingerRate) return;
-    const fireAngle = this._aimAngle !== null
-      ? this._aimAngle
-      : this.rotation + Math.PI / 2;
     const tailAngle = this.rotation + Math.PI / 2;
     const offset = this.height * 0.5;
     const spawnX = this.x + Math.cos(tailAngle) * offset;
     const spawnY = this.y + Math.sin(tailAngle) * offset;
-    const fired = this._onFire(spawnX, spawnY, this._stingerRange, this._stingerDamage, this._stingerSpeed, fireAngle);
+    const fired = this._onFire(spawnX, spawnY, this._stingerRange, this._stingerDamage, this._stingerSpeed, tailAngle);
     if (fired) this._lastFired = time;
   }
 

@@ -14,6 +14,7 @@ new Phaser.Game({
   parent: 'game',
   backgroundColor: '#2d5a1b',
   dom: { createContainer: true },
+  input: { gamepad: true },
   physics: {
     default: 'arcade',
     arcade: { debug: false },
