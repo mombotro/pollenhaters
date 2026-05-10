@@ -3,16 +3,18 @@ import Phaser from 'phaser';
 export default class MenuScene extends Phaser.Scene {
   constructor() { super('MenuScene'); }
 
+  preload() {
+    this.load.image('bee-menu', 'bee.gif');
+  }
+
   create() {
     const cx = 640, cy = 360;
 
-    this.add.dom(cx, cy - 300).createFromHTML(
-      '<img src="bee.gif" style="width:160px;height:auto;display:block;">'
-    );
+    this.add.image(cx, cy - 100, 'bee-menu').setScale(0.5).setDepth(0);
 
     this.add.text(cx, cy - 100, 'PollinHaters', {
       fontSize: '72px', color: '#ffd700', fontStyle: 'bold',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(1);
 
     this.add.text(cx, cy - 20, 'Protect the hive. Survive 10 minutes.', {
       fontSize: '22px', color: '#ffffff',
