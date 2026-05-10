@@ -52,9 +52,9 @@ export const FLOWER = {
 };
 
 export const FLOWER_TYPES = {
-  COMMON:   { weight: 65, sapAmount: 5,  lifespan: 60000, tint: null     },
-  RARE:     { weight: 20, sapAmount: 10, lifespan: 45000, tint: 0xffd700 },
-  AROMATIC: { weight: 15, sapAmount: 5,  lifespan: 60000, tint: 0xcc88ff },
+  COMMON:   { weight: 65, sapAmount: 5,  lifespan: 60000, frame: 0 },
+  RARE:     { weight: 20, sapAmount: 10, lifespan: 45000, frame: 2 },
+  AROMATIC: { weight: 15, sapAmount: 5,  lifespan: 60000, frame: 1 },
 };
 
 // Pure function — testable without Phaser. roll is an integer 1–100.

@@ -45,6 +45,20 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.add.rectangle(WORLD.WIDTH / 2, WORLD.HEIGHT / 2, WORLD.WIDTH, WORLD.HEIGHT, 0x2d5a1b);
     this.cameras.main.setBounds(0, 0, WORLD.WIDTH, WORLD.HEIGHT);
+
+    this._decoList = [];
+    for (let i = 0; i < 150; i++) {
+      const x = Phaser.Math.Between(0, WORLD.WIDTH);
+      const y = Phaser.Math.Between(0, WORLD.HEIGHT);
+      const frame = Phaser.Math.Between(0, 6);
+      const scale = Phaser.Math.FloatBetween(0.1, 0.2);
+      const img = this.add.image(x, y, 'grass-deco', frame)
+        .setScale(scale)
+        .setAlpha(0.9)
+        .setFlipX(Math.random() < 0.5)
+        .setCrop(4, 4, 392, 392);
+      this._decoList.push(img);
+    }
     this.physics.world.setBounds(0, 0, WORLD.WIDTH, WORLD.HEIGHT);
 
     this.flowers = this.physics.add.staticGroup();
@@ -376,8 +390,13 @@ export default class GameScene extends Phaser.Scene {
     );
 
     // Spiders
+    const _spiderAnchors = [
+      ...this.flowers.getChildren().filter(f => f.active && f.lifecycle !== 'young'),
+      ...this._decoList.filter(d => d.active),
+      ...this.breakables.getChildren().filter(b => b.active),
+    ];
     this.spiders.getChildren().forEach(s =>
-      s.update(this._gameTime, scaledDelta, this.flowers, (f1, f2) => this._placeWeb(f1, f2))
+      s.update(this._gameTime, scaledDelta, _spiderAnchors, (f1, f2) => this._placeWeb(f1, f2))
     );
 
     // Apply wind to all flying entities (adds to velocity already set this frame)

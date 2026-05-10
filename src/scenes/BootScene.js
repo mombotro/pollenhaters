@@ -5,36 +5,14 @@ export default class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image('player-bee', 'bee.png');
+    this.load.image('wasp', 'wasp.png');
+    this.load.spritesheet('flower', 'flowers-sheet.png', { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('grass-deco', 'grass-sheet.png', { frameWidth: 400, frameHeight: 400 });
   }
 
   create() {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
 
-    // hunter-wasp: orange with black stripes
-    g.clear();
-    g.fillStyle(0xff6600);
-    g.fillRect(0, 0, 28, 28);
-    g.fillStyle(0x000000);
-    g.fillRect(0, 8, 28, 4);
-    g.fillRect(0, 18, 28, 4);
-    g.generateTexture('hunter-wasp', 28, 28);
-
-    // raider-wasp: dark orange with black stripes
-    g.clear();
-    g.fillStyle(0xcc4400);
-    g.fillRect(0, 0, 28, 28);
-    g.fillStyle(0x000000);
-    g.fillRect(0, 8, 28, 4);
-    g.fillRect(0, 18, 28, 4);
-    g.generateTexture('raider-wasp', 28, 28);
-
-    // flower: green circle with pink center
-    g.clear();
-    g.fillStyle(0x00aa00);
-    g.fillCircle(20, 20, 18);
-    g.fillStyle(0xff99cc);
-    g.fillCircle(20, 20, 8);
-    g.generateTexture('flower', 40, 40);
 
     // hive: amber square with inner square
     g.clear();

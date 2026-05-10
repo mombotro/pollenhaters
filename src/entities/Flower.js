@@ -20,6 +20,8 @@ export default class Flower extends Phaser.Physics.Arcade.Sprite {
     this.pollenCollected = false;
     this.claimedBy       = null;
 
+    this.setFrame(this._typeDef.frame);
+
     if (initialBloom) {
       this._enterMature();
     } else {
@@ -79,18 +81,16 @@ export default class Flower extends Phaser.Physics.Arcade.Sprite {
   }
 
   _applyYoungVisuals() {
-    this.setScale(0.6);
-    this.setAlpha(0.5);
-    if (this._typeDef.tint) this.setTint(this._typeDef.tint);
+    this.setScale(0.06);
+    this.setAlpha(0.6);
   }
 
   _enterMature(time = 0) {
     this._matureAt = time;
     this._state = STATE.MATURE;
-    this.setScale(1);
+    this.setScale(0.1);
     this.setAlpha(1);
-    if (this._typeDef.tint) this.setTint(this._typeDef.tint);
-    else this.clearTint();
+    this.clearTint();
   }
 
   _enterOld(time) {

@@ -19,6 +19,7 @@ new Phaser.Game({
     height: 720,
   },
   backgroundColor: '#2d5a1b',
+  pixelArt: true,
   dom: { createContainer: true },
   input: { gamepad: true },
   physics: {

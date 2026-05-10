@@ -14,11 +14,11 @@ export default class Spider extends Phaser.Physics.Arcade.Sprite {
     this.setDrag(800, 800);
   }
 
-  // flowers: Phaser staticGroup
-  // onPlaceWeb: callback (x, y) => void
-  update(time, delta, flowers, onPlaceWeb) {
+  // anchors: plain array of any objects with {x, y, active}
+  // onPlaceWeb: callback (a1, a2) => void
+  update(time, delta, anchors, onPlaceWeb) {
     if (!this._target || !this._target.active) {
-      this._findTarget(flowers);
+      this._findTarget(anchors);
     }
     if (!this._target) {
       this.setAcceleration(0, 0);
@@ -37,15 +37,13 @@ export default class Spider extends Phaser.Physics.Arcade.Sprite {
       } else if (time - this._dwellStart >= SPIDER.WEB_PLACE_TIME) {
         let f2 = null;
         let f2Dist = Infinity;
-        flowers.getChildren().forEach(f => {
-          if (f === this._target || !f.active) return;
-          const d = Phaser.Math.Distance.Between(this._target.x, this._target.y, f.x, f.y);
-          if (d < 400 && d < f2Dist) { f2 = f; f2Dist = d; }
+        anchors.forEach(a => {
+          if (a === this._target || !a.active) return;
+          const d = Phaser.Math.Distance.Between(this._target.x, this._target.y, a.x, a.y);
+          if (d < 400 && d < f2Dist) { f2 = a; f2Dist = d; }
         });
-        
-        if (f2) {
-          onPlaceWeb(this._target, f2);
-        }
+
+        if (f2) onPlaceWeb(this._target, f2);
         this._dwelling = false;
         this._lastTarget = this._target;
         this._target = null;
@@ -53,12 +51,9 @@ export default class Spider extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  _findTarget(flowers) {
-    const active = flowers.getChildren().filter(f => f.active && f !== this._lastTarget);
-    if (!active.length) {
-      this._target = null;
-      return;
-    }
+  _findTarget(anchors) {
+    const active = anchors.filter(a => a.active && a !== this._lastTarget);
+    if (!active.length) { this._target = null; return; }
     this._target = active[Math.floor(Math.random() * active.length)];
   }
 
