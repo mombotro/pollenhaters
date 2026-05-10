@@ -30,6 +30,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     this._space = scene.input.keyboard.addKey('SPACE');
     this._touchAxis = { x: 0, y: 0 };
     this._touchDash = false;
+    this._aimAngle = null; // non-null when right-click held
   }
 
   update(time, delta) {
@@ -69,6 +70,14 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
+    // Right-click aim: update aim angle from mouse world position
+    const ptr = this.scene.input.mousePointer;
+    if (ptr && ptr.rightButtonDown()) {
+      this._aimAngle = Math.atan2(ptr.worldY - this.y, ptr.worldX - this.x);
+    } else {
+      this._aimAngle = null;
+    }
+
     if (this.isDashing) {
       this.setMaxVelocity(this._speed * BEE.DASH_SPEED_MULTIPLIER, this._speed * BEE.DASH_SPEED_MULTIPLIER);
       this.setAcceleration(0, 0);
@@ -99,7 +108,11 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     const accel = this._speed * 10;
     this.setAcceleration(ax * accel, ay * accel);
 
-    if (this.body.velocity.lengthSq() > 10) {
+    if (this._aimAngle !== null) {
+      // Head faces cursor; rotation lerps quickly to aim
+      const targetRotation = this._aimAngle + Math.PI / 2;
+      this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.25);
+    } else if (this.body.velocity.lengthSq() > 10) {
       const targetRotation = this.body.velocity.angle() + Math.PI / 2;
       this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.15);
     }
@@ -107,9 +120,11 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
 
   _autoFire(time) {
     if (!this._onFire || time - this._lastFired < this._stingerRate) return;
-    // Stinger is at bottom; during head-forward movement, stinger points opposite to head
-    const backwardAngle = this.rotation + Math.PI / 2;
-    const fired = this._onFire(this.x, this.y, this._stingerRange, this._stingerDamage, this._stingerSpeed, backwardAngle);
+    // When aiming: fire from head toward cursor. Otherwise fire from tail (backward).
+    const fireAngle = this._aimAngle !== null
+      ? this._aimAngle
+      : this.rotation + Math.PI / 2;
+    const fired = this._onFire(this.x, this.y, this._stingerRange, this._stingerDamage, this._stingerSpeed, fireAngle);
     if (fired) this._lastFired = time;
   }
 
