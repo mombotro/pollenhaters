@@ -26,6 +26,7 @@ export default class TouchControls {
   }
 
   _onDown(ptr) {
+    if (!ptr.wasTouch) return;
     const { x, y } = ptr;
     if (Math.hypot(x - DASH_CX, y - DASH_CY) <= DASH_R) {
       if (!this._dashPtr) {

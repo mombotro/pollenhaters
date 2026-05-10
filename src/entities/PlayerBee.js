@@ -111,7 +111,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     if (this._aimAngle !== null) {
       // Head faces cursor; rotation lerps quickly to aim
       const targetRotation = this._aimAngle + Math.PI / 2;
-      this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.25);
+      this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.4);
     } else if (this.body.velocity.lengthSq() > 10) {
       const targetRotation = this.body.velocity.angle() + Math.PI / 2;
       this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRotation, 0.15);

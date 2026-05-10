@@ -289,6 +289,7 @@ export default class GameScene extends Phaser.Scene {
       }
     });
 
+    this.input.mouse.disableContextMenu();
     this.hud = new HUD(this, this.resources, this.hive, this.player, this.wind);
     this._touchControls = new TouchControls(this, this.player);
     this._spawnPassiveEntities();
