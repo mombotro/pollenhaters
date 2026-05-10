@@ -26,11 +26,11 @@ export default class Spider extends Phaser.Physics.Arcade.Sprite {
     }
 
     const dist = Phaser.Math.Distance.Between(this.x, this.y, this._target.x, this._target.y);
-    if (dist > 40) {
-      this._dwelling = false;
+    if (!this._dwelling && dist > 40) {
       this._movePhysics(this._target.x, this._target.y, SPIDER.SPEED);
     } else {
       this.setAcceleration(0, 0);
+      this.setVelocity(0, 0);
       if (!this._dwelling) {
         this._dwelling = true;
         this._dwellStart = time;

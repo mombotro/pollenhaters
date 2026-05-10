@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { BREAKABLE } from '../constants.js';
-import Pickup from './Pickup.js';
 
 export default class Breakable extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -30,11 +29,8 @@ export default class Breakable extends Phaser.Physics.Arcade.Sprite {
   }
 
   _break() {
-    // 50% chance for health or XP
     const type = Math.random() < 0.5 ? 'health' : 'xp';
-    const pickup = new Pickup(this.scene, this.x, this.y, type);
-    this.scene.pickups.add(pickup);
-    
+    this.scene._dropPickup(this.x, this.y, type);
     this.destroy();
   }
 }
