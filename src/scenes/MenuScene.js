@@ -6,19 +6,19 @@ export default class MenuScene extends Phaser.Scene {
   create() {
     const cx = 640, cy = 360;
 
-    this.add.dom(cx, cy - 270).createFromHTML(
-      '<img src="bee.gif" style="width:140px;height:auto;display:block;">'
+    this.add.dom(cx, cy - 210).createFromHTML(
+      '<img src="bee.gif" style="width:180px;height:auto;display:block;">'
     );
 
-    this.add.text(cx, cy - 130, 'PollinHaters', {
+    this.add.text(cx, cy - 70, 'PollinHaters', {
       fontSize: '72px', color: '#ffd700', fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(cx, cy - 20, 'Protect the hive. Survive 10 minutes.', {
+    this.add.text(cx, cy + 40, 'Protect the hive. Survive 10 minutes.', {
       fontSize: '22px', color: '#ffffff',
     }).setOrigin(0.5);
 
-    const btnStart = this.add.text(cx, cy + 60, '[ START ]', {
+    const btnStart = this.add.text(cx, cy + 120, '[ START ]', {
       fontSize: '36px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
@@ -26,7 +26,7 @@ export default class MenuScene extends Phaser.Scene {
     btnStart.on('pointerout',  () => btnStart.setColor('#ffd700'));
     btnStart.on('pointerdown', () => this.scene.start('GameScene'));
 
-    const btnUpgrades = this.add.text(cx, cy + 120, '[ UPGRADES ]', {
+    const btnUpgrades = this.add.text(cx, cy + 180, '[ UPGRADES ]', {
       fontSize: '28px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
