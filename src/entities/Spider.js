@@ -8,6 +8,7 @@ export default class Spider extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
     this.setCollideWorldBounds(true);
     this._target = null;
+    this._lastTarget = null;
     this._dwelling = false;
     this._dwellStart = 0;
     this.setDrag(800, 800);
@@ -39,27 +40,26 @@ export default class Spider extends Phaser.Physics.Arcade.Sprite {
         flowers.getChildren().forEach(f => {
           if (f === this._target || !f.active) return;
           const d = Phaser.Math.Distance.Between(this._target.x, this._target.y, f.x, f.y);
-          if (d < 180 && d < f2Dist) { f2 = f; f2Dist = d; }
+          if (d < 400 && d < f2Dist) { f2 = f; f2Dist = d; }
         });
         
         if (f2) {
           onPlaceWeb(this._target, f2);
         }
-        // no second flower in range — skip placement, find a new target
         this._dwelling = false;
+        this._lastTarget = this._target;
         this._target = null;
       }
     }
   }
 
   _findTarget(flowers) {
-    let nearest = null, nearestDist = Infinity;
-    flowers.getChildren().forEach(f => {
-      if (!f.active) return;
-      const d = Phaser.Math.Distance.Between(this.x, this.y, f.x, f.y);
-      if (d < nearestDist) { nearest = f; nearestDist = d; }
-    });
-    this._target = nearest;
+    const active = flowers.getChildren().filter(f => f.active && f !== this._lastTarget);
+    if (!active.length) {
+      this._target = null;
+      return;
+    }
+    this._target = active[Math.floor(Math.random() * active.length)];
   }
 
   _movePhysics(tx, ty, speed) {

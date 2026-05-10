@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { WASP, TOWER } from '../constants.js';
 
 export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, hive, target = null) {
+  constructor(scene, x, y, hive, target = null, waspHive = null) {
     super(scene, x, y, 'raider-wasp');
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -10,6 +10,7 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
     this.hp = WASP.HP;
     this._hive = hive;
     this._target = target || hive;
+    this._waspHive = waspHive;
     this.slowedUntil = 0;
     this.isRetreating = false;
     this.retreatTarget = null;
@@ -21,11 +22,15 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
 
   retreat() {
     this.isRetreating = true;
-    const angle = Phaser.Math.Angle.Between(this._hive.x, this._hive.y, this.x, this.y);
-    this.retreatTarget = {
-      x: this.x + Math.cos(angle) * 2000,
-      y: this.y + Math.sin(angle) * 2000,
-    };
+    if (this._waspHive) {
+      this.retreatTarget = { x: this._waspHive.x, y: this._waspHive.y };
+    } else {
+      const angle = Phaser.Math.Angle.Between(this._hive.x, this._hive.y, this.x, this.y);
+      this.retreatTarget = {
+        x: this.x + Math.cos(angle) * 2000,
+        y: this.y + Math.sin(angle) * 2000,
+      };
+    }
   }
 
   update(time, windVec) {
@@ -46,7 +51,7 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
         ? baseSpeed * TOWER.RESIN_TRAP_SLOW
         : baseSpeed;
       this._movePhysics(this.retreatTarget.x, this.retreatTarget.y, speed);
-      if (this.x < -200 || this.x > 3000 || this.y < -200 || this.y > 2000) {
+      if (Phaser.Math.Distance.Between(this.x, this.y, this.retreatTarget.x, this.retreatTarget.y) < 50) {
         this.destroy();
       }
       return;

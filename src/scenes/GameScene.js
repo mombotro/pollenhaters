@@ -314,7 +314,7 @@ export default class GameScene extends Phaser.Scene {
     this._playTime += scaledDelta;
 
     const workerCount = this.workers.getChildren().filter(w => w.alive).length;
-    if (this.hud) this.hud.update(this._playTime, this.waveManager.getWaveNumber(), workerCount, this.level, this.xp, this.reqXp);
+    if (this.hud) this.hud.update(this._playTime, this.waveManager.getWaveNumber(), workerCount, this.level, this.xp, this.reqXp, this.waspHiveSystem.honeyStolen);
 
     if (this._playTime >= TIMER.RUN_DURATION) {
       this._endGame(true);

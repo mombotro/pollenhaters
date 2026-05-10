@@ -9,11 +9,15 @@ export default class TouchControls {
     this._player = player;
     this._joyPtr  = null;
     this._dashPtr = null;
+    this._aimPtr  = null;
     this._joyOriginX = 0;
     this._joyOriginY = 0;
+    this._aimOriginX = 0;
+    this._aimOriginY = 0;
     this._joyWasActive = false;
+    this._aimWasActive = false;
 
-    scene.input.addPointer(1);
+    scene.input.addPointer(2);
 
     this._hasTouch = false;
     // Static layer drawn once on first touch
@@ -58,18 +62,29 @@ export default class TouchControls {
       this._joyOriginY = y;
       this._player._touchAxis.x = 0;
       this._player._touchAxis.y = 0;
+    } else if (x >= this._scene.scale.width * 0.55 && !this._aimPtr) {
+      this._aimPtr = ptr;
+      this._aimOriginX = x;
+      this._aimOriginY = y;
     }
   }
 
   _onMove(ptr) {
-    if (ptr !== this._joyPtr) return;
-    const dx = ptr.x - this._joyOriginX;
-    const dy = ptr.y - this._joyOriginY;
-    const len = Math.hypot(dx, dy);
-    if (len > 0) {
-      const intensity = Math.min(len / JOY_MAX_R, 1);
-      this._player._touchAxis.x = (dx / len) * intensity;
-      this._player._touchAxis.y = (dy / len) * intensity;
+    if (ptr === this._joyPtr) {
+      const dx = ptr.x - this._joyOriginX;
+      const dy = ptr.y - this._joyOriginY;
+      const len = Math.hypot(dx, dy);
+      if (len > 0) {
+        const intensity = Math.min(len / JOY_MAX_R, 1);
+        this._player._touchAxis.x = (dx / len) * intensity;
+        this._player._touchAxis.y = (dy / len) * intensity;
+      }
+    } else if (ptr === this._aimPtr) {
+      const dx = ptr.x - this._aimOriginX;
+      const dy = ptr.y - this._aimOriginY;
+      if (Math.hypot(dx, dy) > 8) {
+        this._player._aimAngle = Math.atan2(dy, dx);
+      }
     }
   }
 
@@ -82,26 +97,41 @@ export default class TouchControls {
     if (ptr === this._dashPtr) {
       this._dashPtr = null;
     }
+    if (ptr === this._aimPtr) {
+      this._aimPtr = null;
+      this._player._aimAngle = null;
+    }
   }
 
   update() {
     const hasJoy = this._joyPtr !== null;
-    if (!hasJoy && !this._joyWasActive) return;
+    const hasAim = this._aimPtr !== null;
+    if (!hasJoy && !this._joyWasActive && !hasAim && !this._aimWasActive) return;
     this._joyWasActive = hasJoy;
+    this._aimWasActive = hasAim;
 
     this._gfx.clear();
-    if (!hasJoy) return;
 
-    const ax = this._player._touchAxis.x;
-    const ay = this._player._touchAxis.y;
-    this._gfx.lineStyle(3, 0xffffff, 0.4);
-    this._gfx.strokeCircle(this._joyOriginX, this._joyOriginY, JOY_MAX_R);
-    this._gfx.fillStyle(0xffffff, 0.5);
-    this._gfx.fillCircle(
-      this._joyOriginX + ax * JOY_MAX_R,
-      this._joyOriginY + ay * JOY_MAX_R,
-      22,
-    );
+    if (hasJoy) {
+      const ax = this._player._touchAxis.x;
+      const ay = this._player._touchAxis.y;
+      this._gfx.lineStyle(3, 0xffffff, 0.4);
+      this._gfx.strokeCircle(this._joyOriginX, this._joyOriginY, JOY_MAX_R);
+      this._gfx.fillStyle(0xffffff, 0.5);
+      this._gfx.fillCircle(this._joyOriginX + ax * JOY_MAX_R, this._joyOriginY + ay * JOY_MAX_R, 22);
+    }
+
+    if (hasAim) {
+      const dx = this._aimPtr.x - this._aimOriginX;
+      const dy = this._aimPtr.y - this._aimOriginY;
+      const len = Math.hypot(dx, dy);
+      const clampedX = len > JOY_MAX_R ? (dx / len) * JOY_MAX_R : dx;
+      const clampedY = len > JOY_MAX_R ? (dy / len) * JOY_MAX_R : dy;
+      this._gfx.lineStyle(3, 0xff6600, 0.4);
+      this._gfx.strokeCircle(this._aimOriginX, this._aimOriginY, JOY_MAX_R);
+      this._gfx.fillStyle(0xff6600, 0.5);
+      this._gfx.fillCircle(this._aimOriginX + clampedX, this._aimOriginY + clampedY, 22);
+    }
   }
 
   destroy() {

@@ -18,6 +18,7 @@ export default class HUD {
     this._waveText    = scene.add.text(16, 120, '', s).setScrollFactor(0).setDepth(100);
     this._workerText  = scene.add.text(16, 146, '', s).setScrollFactor(0).setDepth(100);
     this._xpText      = scene.add.text(16, 172, '', s).setScrollFactor(0).setDepth(100);
+    this._waspHoneyText = scene.add.text(16, 198, '', s).setScrollFactor(0).setDepth(100);
     this._timerText   = scene.add.text(640, 16, '', { ...s, fontSize: '24px' })
       .setOrigin(0.5, 0).setScrollFactor(0).setDepth(100);
     this._windText    = scene.add.text(640, 42, '', s)
@@ -30,7 +31,7 @@ export default class HUD {
     obj.setText(value);
   }
 
-  update(elapsed, waveNumber, workerCount, level, currentXp, reqXp) {
+  update(elapsed, waveNumber, workerCount, level, currentXp, reqXp, waspHoney) {
     const remaining = Math.max(0, TIMER.RUN_DURATION - elapsed);
     const mins = Math.floor(remaining / 60000);
     const secs = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
@@ -47,7 +48,8 @@ export default class HUD {
     this._set(this._waveText,   'w',  `Wave: ${waveNumber}`);
     this._set(this._timerText,  't',  `${mins}:${secs}`);
     this._set(this._workerText, 'wk', `Workers: ${workerCount}`);
-    this._set(this._xpText,     'x',  `Level: ${level}  XP: ${Math.floor(currentXp)}/${Math.floor(reqXp)}`);
+    this._set(this._xpText,       'x',  `Level: ${level}  XP: ${Math.floor(currentXp)}/${Math.floor(reqXp)}`);
+    this._set(this._waspHoneyText,'wh', `Enemy honey: ${Math.floor(waspHoney ?? 0)}`);
 
     if (this._wind) {
       const vec = this._wind.getVector();

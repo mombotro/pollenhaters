@@ -20,6 +20,7 @@ export default class WaspHiveSystem {
   }
 
   get hive() { return this._hive; }
+  get honeyStolen() { return this._totalHoneyStolen; }
 
   onHoneyStolen(amount) {
     this._totalHoneyStolen += amount;
@@ -88,7 +89,7 @@ export default class WaspHiveSystem {
       const target = guardPosts.length > 0 && Math.random() < 0.4
         ? Phaser.Utils.Array.GetRandom(guardPosts)
         : this._scene.hive;
-      const w = new RaiderWasp(this._scene, hx, hy, this._scene.hive, target);
+      const w = new RaiderWasp(this._scene, hx, hy, this._scene.hive, target, this._hive);
       if (Math.random() < pc) { w.hp = 2; w._speedMult = 1.25; }
       this._scene.wasps.add(w);
       if (Math.random() < 0.5) {
