@@ -9,7 +9,7 @@ export default class MenuScene extends Phaser.Scene {
     this._gpDirWasDown = false;
     const cx = 640, cy = 360;
 
-    this.add.dom(cx, cy - 260).createFromHTML(`
+    this._headerDom = this.add.dom(cx, cy - 260).createFromHTML(`
       <div style="position:relative;width:300px;text-align:center;">
         <img src="bee.gif" style="width:180px;display:block;margin:-40px auto 0;">
         <img src="splash.png" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;z-index:1;">
@@ -68,6 +68,7 @@ export default class MenuScene extends Phaser.Scene {
 
   _showControls() {
     if (this._controlsObjs) return;
+    this._headerDom.setVisible(false);
     const cx = 640, cy = 360;
     const D = 300;
     const objs = [];
@@ -108,6 +109,7 @@ export default class MenuScene extends Phaser.Scene {
     if (!this._controlsObjs) return;
     this._controlsObjs.forEach(o => o.destroy());
     this._controlsObjs = null;
+    this._headerDom.setVisible(true);
   }
 
   _refreshHighlight() {

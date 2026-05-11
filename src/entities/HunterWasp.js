@@ -72,6 +72,7 @@ export default class HunterWasp extends Phaser.Physics.Arcade.Sprite {
       }
       if (this.honeyCarried > 0) {
         if (dist < 50) {
+          this.scene._burst?.(this.retreatTarget.x, this.retreatTarget.y, 0xff4400, 8);
           this.scene.waspHiveSystem.onHoneyStolen(this.honeyCarried);
           this.destroy();
         }

@@ -66,6 +66,7 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
       this._movePhysics(this.retreatTarget.x, this.retreatTarget.y, speed);
       if (Phaser.Math.Distance.Between(this.x, this.y, this.retreatTarget.x, this.retreatTarget.y) < 50) {
         if (this.honeyCarried > 0 && this.scene.waspHiveSystem) {
+          this.scene._burst?.(this.retreatTarget.x, this.retreatTarget.y, 0xff4400, 8);
           this.scene.waspHiveSystem.onHoneyStolen(this.honeyCarried);
         } else if (this.poisonCarried && this.scene.waspHiveSystem) {
           this.scene.waspHiveSystem.onPoisonDelivered(TOWER.POISON_HONEY_DAMAGE);

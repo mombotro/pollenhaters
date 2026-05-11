@@ -47,6 +47,11 @@ export default class BootScene extends Phaser.Scene {
     g.generateTexture('stinger-turret', 40, 40);
 
     g.clear();
+    g.fillStyle(0xffffff);
+    g.fillCircle(4, 4, 4);
+    g.generateTexture('particle', 8, 8);
+
+    g.clear();
     g.lineStyle(2, 0xffffff, 0.7);
     g.strokeCircle(24, 24, 22);
     g.strokeCircle(24, 24, 14);

@@ -161,11 +161,13 @@ export default class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.hive, () => {
       if (this.resources.getSapCarried('player') > 0) {
+        this._burst(this.hive.x, this.hive.y, 0xffd700, 10);
         this.resources.depositSap('player');
       }
     });
 
     this.physics.add.overlap(this.player, this.pickups, (player, pickup) => {
+      this._burst(pickup.x, pickup.y, 0xffff88, 6);
       pickup.onCollect(player, this);
     });
 
@@ -307,6 +309,7 @@ export default class GameScene extends Phaser.Scene {
       wasp.lastHit = now;
 
       if (this.resources.getHoney() > 0) {
+        this._burst(hive.x, hive.y, 0xff8800, 8);
         this.resources.stealHoney(WASP.HONEY_STEAL);
         wasp.honeyCarried = WASP.HONEY_STEAL;
         wasp.retreat();
@@ -479,6 +482,19 @@ export default class GameScene extends Phaser.Scene {
     let p = this.pickups.getFirstDead(false);
     if (!p) { p = new Pickup(this, x, y); this.pickups.add(p); }
     p.fire(x, y, type);
+  }
+
+  _burst(x, y, color, count = 8) {
+    const e = this.add.particles(x, y, 'particle', {
+      speed: { min: 60, max: 160 },
+      scale: { start: 0.5, end: 0 },
+      alpha: { start: 1, end: 0 },
+      lifespan: 450,
+      tint: color,
+      emitting: false,
+    });
+    e.explode(count);
+    this.time.delayedCall(500, () => { if (e?.scene) e.destroy(); });
   }
 
   _collectXp(val) {
