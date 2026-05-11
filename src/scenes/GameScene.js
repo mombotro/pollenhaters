@@ -152,6 +152,14 @@ export default class GameScene extends Phaser.Scene {
           this.pollination.pollinate({ x: flower.x, y: flower.y }, this.time.now);
         }
         const taken = flower.collectSap(space);
+        if (taken > 0) {
+          const now = this._gameTime;
+          if (!flower._lastBurst || now - flower._lastBurst > 400) {
+            this._burst(flower.x, flower.y, 0xffff88, 5);
+            SoundSynth.play('pickup');
+            flower._lastBurst = now;
+          }
+        }
         this.resources.addSap('player', taken, this.player._sapCapacity);
       } else if (flower.sapRemaining <= 0) {
         if (flower.collectPollen()) {
