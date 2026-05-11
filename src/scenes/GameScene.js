@@ -367,22 +367,27 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(time, delta) {
+    const _gp  = this.input.gamepad;
+    const _pad = _gp?.total > 0 ? _gp.gamepads.find(p => p?.connected) : null;
+
     if (this.levelUpMenu.visible) {
       this.physics.world.pause();
+      if (_pad) this.levelUpMenu.gpUpdate(_pad);
       return;
     }
 
     // Pause toggle — Escape or gamepad Start (button 9)
-    const justEsc = Phaser.Input.Keyboard.JustDown(this._escKey);
-    const _gp = this.input.gamepad;
-    const _pad = _gp?.total > 0 ? _gp.gamepads.find(p => p?.connected) : null;
+    const justEsc  = Phaser.Input.Keyboard.JustDown(this._escKey);
     const startDown = _pad?.buttons[9]?.pressed ?? false;
     if ((justEsc || (startDown && !this._gpStartWasDown)) && !this._ended) {
       if (this._paused) this._hidePause(); else this._showPause();
     }
     this._gpStartWasDown = startDown;
 
-    if (this._paused) return;
+    if (this._paused) {
+      if (_pad) this._updatePauseGamepad(_pad);
+      return;
+    }
 
     this.physics.world.resume();
 
@@ -506,6 +511,8 @@ export default class GameScene extends Phaser.Scene {
       if (wave) this.waspHiveSystem.spawnWave(wave);
     }
     this.waspHiveSystem.update(this._gameTime);
+    if (_pad && this.buildMenu.visible) this.buildMenu.gpUpdate(_pad);
+    if (_pad && this._playground && this._pgBtns) this._updatePlaygroundGamepad(_pad);
     this._touchControls.update();
   }
 
@@ -534,20 +541,61 @@ export default class GameScene extends Phaser.Scene {
       const b = add(this.add.text(cx, y, label, {
         fontSize: '30px', color, fontFamily: 'monospace',
       }).setOrigin(0.5).setDepth(D).setScrollFactor(0).setInteractive({ useHandCursor: true }));
+      b._col = color;
       b.on('pointerover', () => b.setColor('#ffffff'));
-      b.on('pointerout',  () => b.setColor(color));
+      b.on('pointerout',  () => b.setColor(b._col));
       return b;
     };
 
-    mkBtn('[ RESUME ]',   cy - 50).on('pointerdown', () => this._hidePause());
-    mkBtn('[ CONTROLS ]', cy + 20).on('pointerdown', () => this._showPauseControls());
-    mkBtn('[ RESTART ]',  cy + 90).on('pointerdown', () => {
-      this._hidePause();
-      this.scene.start('GameScene', { playground: this._playground });
-    });
-    mkBtn('[ MENU ]',     cy + 160, '#aaaaaa').on('pointerdown', () => this.scene.start('MenuScene'));
+    const btnResume   = mkBtn('[ RESUME ]',   cy - 50);
+    const btnControls = mkBtn('[ CONTROLS ]', cy + 20);
+    const btnRestart  = mkBtn('[ RESTART ]',  cy + 90);
+    const btnMenu     = mkBtn('[ MENU ]',     cy + 160, '#aaaaaa');
 
+    btnResume.on('pointerdown',   () => this._hidePause());
+    btnControls.on('pointerdown', () => this._showPauseControls());
+    btnRestart.on('pointerdown',  () => { this._hidePause(); this.scene.start('GameScene', { playground: this._playground }); });
+    btnMenu.on('pointerdown',     () => this.scene.start('MenuScene'));
+
+    this._pauseBtns    = [btnResume, btnControls, btnRestart, btnMenu];
+    this._pauseActions = [
+      () => this._hidePause(),
+      () => this._showPauseControls(),
+      () => { this._hidePause(); this.scene.start('GameScene', { playground: this._playground }); },
+      () => this.scene.start('MenuScene'),
+    ];
+    this._pauseSelIdx    = 0;
+    this._gpPauseAWas    = false;
+    this._gpPauseDirWas  = false;
+    this._gpPauseBWas    = false;
+    this._gpRefreshPause();
     this._pauseObjs = objs;
+  }
+
+  _gpRefreshPause() {
+    this._pauseBtns?.forEach((b, i) => b.setColor(i === this._pauseSelIdx ? '#ffffff' : b._col));
+  }
+
+  _updatePauseGamepad(pad) {
+    if (this._pauseCtrlObjs) {
+      const bDown = pad.buttons[1]?.pressed ?? false;
+      if (bDown && !this._gpPauseBWas) this._hidePauseControls();
+      this._gpPauseBWas = bDown;
+      return;
+    }
+    const dirDown = pad.buttons[12]?.pressed || pad.buttons[13]?.pressed;
+    if (dirDown && !this._gpPauseDirWas) {
+      const dy = pad.buttons[12]?.pressed ? -1 : 1;
+      this._pauseSelIdx = (this._pauseSelIdx + dy + this._pauseBtns.length) % this._pauseBtns.length;
+      this._gpRefreshPause();
+    }
+    this._gpPauseDirWas = dirDown;
+    const aDown = pad.buttons[0]?.pressed ?? false;
+    if (aDown && !this._gpPauseAWas) this._pauseActions[this._pauseSelIdx]?.();
+    this._gpPauseAWas = aDown;
+    const bDown = pad.buttons[1]?.pressed ?? false;
+    if (bDown && !this._gpPauseBWas) this._hidePause();
+    this._gpPauseBWas = bDown;
   }
 
   _hidePause() {
@@ -855,44 +903,50 @@ export default class GameScene extends Phaser.Scene {
   }
 
   _createPlaygroundUI() {
-    const s = { fontSize: '20px', color: '#ffffff', stroke: '#000000', strokeThickness: 4, fontFamily: 'monospace' };
+    const s  = { fontSize: '20px', color: '#ffffff', stroke: '#000000', strokeThickness: 4, fontFamily: 'monospace' };
     const hs = { ...s, fontSize: '16px', color: '#ffdd44' };
 
-    this.add.text(640, 16, 'PLAYGROUND MODE', hs)
+    this.add.text(640, 16, 'PLAYGROUND  (RB=cycle  X=select)', hs)
       .setOrigin(0.5, 0).setScrollFactor(0).setDepth(200);
 
-    const btnHunter = this.add.text(430, 660, '[ Spawn Hunter ]', s)
-      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
-    btnHunter.on('pointerover', () => btnHunter.setColor('#ffaa00'));
-    btnHunter.on('pointerout',  () => btnHunter.setColor('#ffffff'));
-    btnHunter.on('pointerdown', () => this._spawnPlaygroundWasp('hunter'));
+    const pgDefs = [
+      { x: 380, label: '[ Spawn Hunter ]', action: () => this._spawnPlaygroundWasp('hunter') },
+      { x: 560, label: '[ Spawn Raider ]', action: () => this._spawnPlaygroundWasp('raider') },
+      { x: 740, label: '[ Spawn Archer ]', action: () => this._spawnPlaygroundWasp('archer') },
+      { x: 910, label: '[ Max Honey ]',    action: () => this.resources.addHoney(this.resources.getHoneyStorage()) },
+      { x: 1060, label: '[ Exit ]',        action: () => this.scene.start('MenuScene') },
+    ];
 
-    const btnRaider = this.add.text(590, 660, '[ Spawn Raider ]', s)
-      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
-    btnRaider.on('pointerover', () => btnRaider.setColor('#ff6600'));
-    btnRaider.on('pointerout',  () => btnRaider.setColor('#ffffff'));
-    btnRaider.on('pointerdown', () => this._spawnPlaygroundWasp('raider'));
-
-    const btnArcher = this.add.text(760, 660, '[ Spawn Archer ]', s)
-      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
-    btnArcher.on('pointerover', () => btnArcher.setColor('#aa44ff'));
-    btnArcher.on('pointerout',  () => btnArcher.setColor('#ffffff'));
-    btnArcher.on('pointerdown', () => this._spawnPlaygroundWasp('archer'));
-
-    const btnHoney = this.add.text(930, 660, '[ Max Honey ]', s)
-      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
-    btnHoney.on('pointerover', () => btnHoney.setColor('#ffdd00'));
-    btnHoney.on('pointerout',  () => btnHoney.setColor('#ffffff'));
-    btnHoney.on('pointerdown', () => {
-      const cap = this.resources.getHoneyStorage();
-      this.resources.addHoney(cap);
+    this._pgBtns    = pgDefs.map(({ x, label, action }) => {
+      const b = this.add.text(x, 660, label, s)
+        .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
+      b.on('pointerover',  () => b.setColor('#ffaa00'));
+      b.on('pointerout',   () => b.setColor('#ffffff'));
+      b.on('pointerdown',  action);
+      return b;
     });
+    this._pgActions  = pgDefs.map(d => d.action);
+    this._pgSelIdx   = 0;
+    this._pgGpRBWas  = false;
+    this._pgGpXWas   = false;
+    this._pgRefresh();
+  }
 
-    const btnBack = this.add.text(1100, 660, '[ Exit ]', s)
-      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(200).setInteractive({ useHandCursor: true });
-    btnBack.on('pointerover', () => btnBack.setColor('#ff4444'));
-    btnBack.on('pointerout',  () => btnBack.setColor('#ffffff'));
-    btnBack.on('pointerdown', () => this.scene.start('MenuScene'));
+  _pgRefresh() {
+    this._pgBtns?.forEach((b, i) => b.setColor(i === this._pgSelIdx ? '#ffaa00' : '#ffffff'));
+  }
+
+  _updatePlaygroundGamepad(pad) {
+    const rbDown = pad.buttons[5]?.pressed ?? false;
+    if (rbDown && !this._pgGpRBWas) {
+      this._pgSelIdx = (this._pgSelIdx + 1) % this._pgBtns.length;
+      this._pgRefresh();
+    }
+    this._pgGpRBWas = rbDown;
+
+    const xDown = pad.buttons[2]?.pressed ?? false;
+    if (xDown && !this._pgGpXWas) this._pgActions[this._pgSelIdx]?.();
+    this._pgGpXWas = xDown;
   }
 
   _spawnPlaygroundWasp(type) {

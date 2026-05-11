@@ -7,6 +7,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'player-bee');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(10);
     this.setCollideWorldBounds(true);
     this.hp = BEE.HP;
     this.maxHp = BEE.HP;

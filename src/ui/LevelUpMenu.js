@@ -60,8 +60,6 @@ export default class LevelUpMenu {
 
     const available = upgradesManager.getAvailableUpgrades();
     Phaser.Utils.Array.Shuffle(available);
-    
-    // Pick up to 3
     this._options = available.slice(0, 3);
 
     this._cards.forEach((card, i) => {
@@ -76,6 +74,39 @@ export default class LevelUpMenu {
         card.text.setVisible(false);
       }
     });
+
+    this._gpIdx    = 0;
+    this._gpAWas   = false;
+    this._gpDirWas = false;
+    this._gpRefresh();
+  }
+
+  _gpRefresh() {
+    this._cards.forEach((card, i) => {
+      if (i < (this._options?.length ?? 0)) {
+        card.bg.setFillStyle(i === this._gpIdx ? 0x886600 : 0x333333);
+      }
+    });
+  }
+
+  gpUpdate(pad) {
+    const n = this._options?.length ?? 0;
+    if (!n) return;
+
+    const dirDown = pad.buttons[12]?.pressed || pad.buttons[13]?.pressed;
+    if (dirDown && !this._gpDirWas) {
+      const dy = pad.buttons[12]?.pressed ? -1 : 1;
+      this._gpIdx = (this._gpIdx + dy + n) % n;
+      this._gpRefresh();
+    }
+    this._gpDirWas = dirDown;
+
+    const aDown = pad.buttons[0]?.pressed ?? false;
+    if (aDown && !this._gpAWas && this._options[this._gpIdx]) {
+      this._onSelect(this._options[this._gpIdx]);
+      this.hide();
+    }
+    this._gpAWas = aDown;
   }
 
   hide() {
