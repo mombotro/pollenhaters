@@ -262,6 +262,7 @@ export default class GameScene extends Phaser.Scene {
     if (_u.START_SOLDIER) this._recruitSoldier(true);
 
     this.physics.add.overlap(this.stingers, this.wasps, (stinger, wasp) => {
+      if (!stinger.active || !wasp.active) return;
       stinger.release();
       SoundSynth.play('hit');
       if (wasp.takeDamage(stinger.damage)) {
@@ -272,6 +273,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.waspHiveSystem.hives.forEach(wh => {
       this.physics.add.overlap(wh, this.stingers, (waspHive, stinger) => {
+        if (!stinger.active) return;
         stinger.release();
         this.waspHiveSystem.onHiveAttacked(this._gameTime, waspHive);
         if (waspHive.takeDamage(stinger.damage)) {
