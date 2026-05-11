@@ -5,22 +5,18 @@ export default class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image('player-bee', 'bee.png');
+    this.load.image('splash', 'splash.png');
     this.load.image('wasp', 'wasp.png');
     this.load.spritesheet('flower', 'flowers-sheet.png', { frameWidth: 400, frameHeight: 400 });
     this.load.spritesheet('grass-deco', 'grass-sheet.png', { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('hives', 'hives.png', { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('pickups', 'pickups.png', { frameWidth: 400, frameHeight: 400 });
   }
 
   create() {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
 
 
-    // hive: amber square with inner square
-    g.clear();
-    g.fillStyle(0xcc8800);
-    g.fillRect(0, 0, 64, 64);
-    g.fillStyle(0xffaa00);
-    g.fillRect(8, 8, 48, 48);
-    g.generateTexture('hive', 64, 64);
 
     // stinger: small white rectangle
     g.clear();
@@ -56,11 +52,6 @@ export default class BootScene extends Phaser.Scene {
     g.fillRect(10, 10, 20, 20);
     g.generateTexture('guard-post', 40, 40);
 
-    g.clear();
-    g.fillStyle(0x00ffff);
-    g.fillCircle(6, 6, 4);
-    g.generateTexture('xp-gem', 12, 12);
-
     // butterfly: small cyan wing-diamond shape
     g.clear();
     g.fillStyle(0x00dddd);
@@ -89,42 +80,6 @@ export default class BootScene extends Phaser.Scene {
     g.lineBetween(7, 7, 41, 41);
     g.lineBetween(41, 7, 7, 41);
     g.generateTexture('web', 48, 48);
-
-    // breakable: brown crate
-    g.clear();
-    g.fillStyle(0x8b4513);
-    g.fillRect(0, 0, 32, 32);
-    g.lineStyle(2, 0x5c2e0b, 1);
-    g.strokeRect(1, 1, 30, 30);
-    g.lineBetween(2, 2, 30, 30);
-    g.lineBetween(2, 30, 30, 2);
-    g.generateTexture('breakable', 32, 32);
-
-    // health-pickup: red cross
-    g.clear();
-    g.fillStyle(0xff0000);
-    g.fillRect(4, 0, 4, 12);
-    g.fillRect(0, 4, 12, 4);
-    g.generateTexture('health-pickup', 12, 12);
-
-    // honey-drop: golden droplet
-    g.clear();
-    g.fillStyle(0xffaa00);
-    g.fillCircle(8, 9, 6);
-    g.fillTriangle(8, 0, 3, 8, 13, 8);
-    g.fillStyle(0xffdd55);
-    g.fillCircle(6, 8, 2);
-    g.generateTexture('honey-drop', 16, 16);
-
-    // wasp-hive: brown square with dark center
-    g.clear();
-    g.fillStyle(0x884400);
-    g.fillRect(0, 0, 64, 64);
-    g.fillStyle(0xcc6600);
-    g.fillRect(8, 8, 48, 48);
-    g.fillStyle(0x000000);
-    g.fillCircle(32, 32, 12);
-    g.generateTexture('wasp-hive', 64, 64);
 
     g.destroy();
     this.scene.start('MenuScene');

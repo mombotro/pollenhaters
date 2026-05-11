@@ -9,19 +9,18 @@ export default class MenuScene extends Phaser.Scene {
     this._gpDirWasDown = false;
     const cx = 640, cy = 360;
 
-    this.add.dom(cx, cy - 310).createFromHTML(
-      '<img src="bee.gif" style="width:180px;height:auto;display:block;">'
-    );
+    this.add.dom(cx, cy - 260).createFromHTML(`
+      <div style="position:relative;width:300px;text-align:center;">
+        <img src="bee.gif" style="width:180px;display:block;margin:-40px auto 0;">
+        <img src="splash.png" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;z-index:1;">
+      </div>
+    `);
 
-    this.add.text(cx, cy - 70, 'PollinHaters', {
-      fontSize: '72px', color: '#ffd700', fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    this.add.text(cx, cy + 40, 'Protect the hive. Survive 10 minutes.', {
+    this.add.text(cx, cy + 90, 'Protect the hive. Survive 10 minutes.', {
       fontSize: '22px', color: '#ffffff',
     }).setOrigin(0.5);
 
-    const btnStart = this.add.text(cx, cy + 120, '[ START ]', {
+    const btnStart = this.add.text(cx, cy + 170, '[ START ]', {
       fontSize: '36px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
@@ -29,7 +28,7 @@ export default class MenuScene extends Phaser.Scene {
     btnStart.on('pointerout',  () => this._refreshHighlight());
     btnStart.on('pointerdown', () => this.scene.start('GameScene'));
 
-    const btnUpgrades = this.add.text(cx, cy + 180, '[ UPGRADES ]', {
+    const btnUpgrades = this.add.text(cx, cy + 225, '[ UPGRADES ]', {
       fontSize: '28px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
@@ -37,7 +36,7 @@ export default class MenuScene extends Phaser.Scene {
     btnUpgrades.on('pointerout',  () => this._refreshHighlight());
     btnUpgrades.on('pointerdown', () => this.scene.start('MetaUpgradeScene'));
 
-    const btnPlayground = this.add.text(cx, cy + 230, '[ PLAYGROUND ]', {
+    const btnPlayground = this.add.text(cx, cy + 275, '[ PLAYGROUND ]', {
       fontSize: '22px', color: '#ffd700',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 

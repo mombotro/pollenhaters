@@ -4,9 +4,10 @@ import Stinger from './Stinger.js';
 
 export default class GuardBee extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y, post) {
-    super(scene, x, y, 'guard-bee');
+    super(scene, x, y, 'player-bee');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setScale(0.5).setTint(0x4488ff);
     this.setCollideWorldBounds(true);
     this.hp = TOWER.GUARD_BEE_HP;
     this.maxHp = TOWER.GUARD_BEE_HP;

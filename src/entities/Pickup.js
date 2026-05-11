@@ -3,16 +3,18 @@ import { PICKUP, XP } from '../constants.js';
 
 export default class Pickup extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
-    super(scene, x, y, 'xp-gem');
+    super(scene, x, y, 'pickups', 0);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.type = 'xp';
+    this.setScale(0.1);
     this.setActive(false).setVisible(false);
   }
 
   fire(x, y, type) {
     this.type = type;
-    this.setTexture(type === 'health' ? 'health-pickup' : type === 'honey' ? 'honey-drop' : 'xp-gem');
+    const frame = type === 'health' ? 2 : type === 'honey' ? 1 : 0;
+    this.setTexture('pickups', frame);
     this.setPosition(x, y).setActive(true).setVisible(true);
     if (this.body) this.body.setEnable(true);
     this.body.reset(x, y);

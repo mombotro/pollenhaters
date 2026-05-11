@@ -7,7 +7,7 @@ export default class WorkerBee extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'player-bee');
     scene.add.existing(this);
-    this.setScale(0.6);
+    this.setScale(0.5).setTint(0x88ff44);
     scene.physics.add.existing(this);
     this.setCollideWorldBounds(true);
     this.hp = WORKER.HP;
@@ -107,7 +107,7 @@ export default class WorkerBee extends Phaser.Physics.Arcade.Sprite {
     if (!this.alive) return false;
     this.hp = Math.max(0, this.hp - amount);
     this.setTint(0xff4444);
-    this.scene.time.delayedCall(150, () => { if (this.active) this.clearTint(); });
+    this.scene.time.delayedCall(150, () => { if (this.active) this.setTint(0x88ff44); });
     if (this.hp <= 0) {
       this.alive = false;
       if (this._target) { this._target.claimedBy = null; this._target = null; }

@@ -4,12 +4,12 @@ import Stinger from './Stinger.js';
 
 export default class SoldierBee extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
-    super(scene, x, y, 'guard-bee');
+    super(scene, x, y, 'player-bee');
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setCollideWorldBounds(true);
-    this.setScale(0.85);
-    this.setTint(0xffdd44);
+    this.setScale(0.55);
+    this.setTint(0xff8800);
     this.alive = true;
     this.hp = SOLDIER.HP;
     this.maxHp = SOLDIER.HP;
@@ -58,7 +58,7 @@ export default class SoldierBee extends Phaser.Physics.Arcade.Sprite {
     if (!this.alive) return false;
     this.hp = Math.max(0, this.hp - amount);
     this.setTint(0xff4444);
-    this.scene.time.delayedCall(150, () => { if (this.active) this.setTint(0xffdd44); });
+    this.scene.time.delayedCall(150, () => { if (this.active) this.setTint(0xff8800); });
     if (this.hp <= 0) {
       this.alive = false;
       this.setVisible(false).setActive(false);

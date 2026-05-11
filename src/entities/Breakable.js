@@ -3,11 +3,11 @@ import { BREAKABLE } from '../constants.js';
 
 export default class Breakable extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
-    super(scene, x, y, 'breakable');
+    super(scene, x, y, 'pickups', 4);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setImmovable(true);
-    
+    this.setScale(0.08);
     this.hp = BREAKABLE.HP;
   }
 
@@ -31,6 +31,9 @@ export default class Breakable extends Phaser.Physics.Arcade.Sprite {
   _break() {
     const type = Math.random() < 0.5 ? 'health' : 'xp';
     this.scene._dropPickup(this.x, this.y, type);
-    this.destroy();
+    this.setFrame(5);
+    this.setActive(false);
+    if (this.body) this.body.setEnable(false);
+    this.scene.time.delayedCall(400, () => { if (this.scene) this.destroy(); });
   }
 }
