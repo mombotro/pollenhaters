@@ -322,11 +322,13 @@ export default class GameScene extends Phaser.Scene {
 
       if (this.resources.getHoney() > 0) {
         this._burst(hive.x, hive.y, 0xff8800, 8);
+        this._burst(hive.x, hive.y, 0x6b3a1f, 5);
         SoundSynth.play('hive-hit');
         this.resources.stealHoney(WASP.HONEY_STEAL);
         wasp.honeyCarried = WASP.HONEY_STEAL;
         wasp.retreat();
       } else {
+        this._burst(hive.x, hive.y, 0x6b3a1f, 6);
         SoundSynth.play('hive-hit');
         if (hive.takeDamage(WASP.DAMAGE)) this._endGame(false);
       }

@@ -17,11 +17,12 @@ export default class Breakable extends Phaser.Physics.Arcade.Sprite {
     if (!this.active) return false;
     
     this.hp -= amount;
-    
+    this.scene._burst?.(this.x, this.y, 0x6b3a1f, this.hp <= 0 ? 8 : 4);
+
     // Flash white when hit
     this.setTint(0xffffff);
     this.scene.time.delayedCall(80, () => { if (this.active) this.clearTint(); });
-    
+
     if (this.hp <= 0) {
       this._break();
       return true;
