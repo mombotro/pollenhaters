@@ -148,15 +148,13 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
   _startHoneyGlow() {
     if (this._honeyEmitter) return;
     this._honeyEmitter = this.scene.add.particles(this.x, this.y, 'particle', {
-      speed: { min: 15, max: 35 },
-      scale: { start: 0.22, end: 0 },
-      alpha: { start: 0.85, end: 0 },
-      lifespan: 500,
-      frequency: 90,
+      speed: { min: 20, max: 45 },
+      scale: { start: 0.45, end: 0 },
+      alpha: { start: 1, end: 0 },
+      lifespan: 600,
+      frequency: 80,
       tint: 0xffdd00,
       quantity: 1,
-      blendMode: 'ADD',
-      emitZone: { type: 'random', source: new Phaser.Geom.Circle(0, 0, 10) },
     });
     this._honeyEmitter.startFollow(this);
     this.once('destroy', () => { if (this._honeyEmitter?.scene) this._honeyEmitter.destroy(); });

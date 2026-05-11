@@ -27,7 +27,7 @@ export default class MenuScene extends Phaser.Scene {
 
     btnStart.on('pointerover', () => { this._selIdx = 0; this._refreshHighlight(); });
     btnStart.on('pointerout',  () => this._refreshHighlight());
-    btnStart.on('pointerdown', () => this.scene.start('GameScene'));
+    btnStart.on('pointerdown', () => this.scene.start('GameScene', {}));
 
     const btnUpgrades = this.add.text(cx, cy + 225, '[ UPGRADES ]', {
       fontSize: '28px', color: '#ffd700',
@@ -59,7 +59,7 @@ export default class MenuScene extends Phaser.Scene {
 
     this._btns = [btnStart, btnUpgrades, btnPlayground, btnControls];
     this._actions = [
-      () => this.scene.start('GameScene'),
+      () => this.scene.start('GameScene', {}),
       () => this.scene.start('MetaUpgradeScene'),
       () => this.scene.start('GameScene', { playground: true }),
       () => this._showControls(),
