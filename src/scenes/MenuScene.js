@@ -44,13 +44,64 @@ export default class MenuScene extends Phaser.Scene {
     btnPlayground.on('pointerout',  () => this._refreshHighlight());
     btnPlayground.on('pointerdown', () => this.scene.start('GameScene', { playground: true }));
 
-    this._btns = [btnStart, btnUpgrades, btnPlayground];
+    const btnControls = this.add.text(cx, cy + 315, '[ CONTROLS ]', {
+      fontSize: '20px', color: '#ffd700',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    btnControls.on('pointerover', () => { this._selIdx = 3; this._refreshHighlight(); });
+    btnControls.on('pointerout',  () => this._refreshHighlight());
+    btnControls.on('pointerdown', () => this._showControls());
+
+    this._btns = [btnStart, btnUpgrades, btnPlayground, btnControls];
     this._actions = [
       () => this.scene.start('GameScene'),
       () => this.scene.start('MetaUpgradeScene'),
       () => this.scene.start('GameScene', { playground: true }),
+      () => this._showControls(),
     ];
     this._refreshHighlight();
+  }
+
+  _showControls() {
+    if (this._controlsPanel) return;
+    const cx = 640, cy = 360;
+    const panel = this.add.container(0, 0).setDepth(300);
+
+    const bg = this.add.rectangle(cx, cy, 760, 480, 0x000000, 0.93);
+    const title = this.add.text(cx, cy - 210, 'CONTROLS', {
+      fontSize: '30px', color: '#ffd700', fontFamily: 'monospace', fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    const s = { fontSize: '17px', color: '#ffffff', fontFamily: 'monospace' };
+    const h = { ...s, color: '#ffdd44', fontSize: '19px', fontStyle: 'bold' };
+    const lh = 32, top = cy - 150;
+
+    const kbLines  = ['KEYBOARD', 'WASD / Arrows  —  Move', 'Space          —  Dash', 'Right-click    —  Aim', 'B              —  Build menu'];
+    const gpLines  = ['CONTROLLER', 'Left stick     —  Move', 'A button       —  Dash', 'Right stick    —  Aim', 'D-pad          —  Menus'];
+
+    const texts = [];
+    kbLines.forEach((label, i) => {
+      texts.push(this.add.text(col1, top + i * lh, label, i === 0 ? h : s).setOrigin(0, 0.5));
+    });
+    gpLines.forEach((label, i) => {
+      texts.push(this.add.text(col2, top + i * lh, label, i === 0 ? h : s).setOrigin(0, 0.5));
+    });
+
+    const btnClose = this.add.text(cx, cy + 210, '[ CLOSE ]', {
+      fontSize: '22px', color: '#ff4444', fontFamily: 'monospace',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    btnClose.on('pointerover', () => btnClose.setColor('#ff8888'));
+    btnClose.on('pointerout',  () => btnClose.setColor('#ff4444'));
+    btnClose.on('pointerdown', () => this._hideControls());
+
+    panel.add([bg, title, ...texts, btnClose]);
+    this._controlsPanel = panel;
+  }
+
+  _hideControls() {
+    if (!this._controlsPanel) return;
+    this._controlsPanel.destroy(true);
+    this._controlsPanel = null;
   }
 
   _refreshHighlight() {

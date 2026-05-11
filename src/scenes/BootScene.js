@@ -4,34 +4,41 @@ export default class BootScene extends Phaser.Scene {
   constructor() { super('BootScene'); }
 
   preload() {
+    const cx = 640, cy = 360;
+    const barW = 400, barH = 16;
+
+    this.add.text(cx, cy - 40, 'Loading...', {
+      fontSize: '28px', color: '#ffd700', fontFamily: 'monospace',
+    }).setOrigin(0.5);
+
+    const barBg = this.add.rectangle(cx, cy, barW, barH, 0x333333).setOrigin(0.5);
+    const bar   = this.add.rectangle(cx - barW / 2, cy, 0, barH, 0xffd700).setOrigin(0, 0.5);
+
+    this.load.on('progress', v => bar.setSize(barW * v, barH));
+
     this.load.image('player-bee', 'bee.png');
-    this.load.image('splash', 'splash.png');
+    this.load.image('splash', 'splash-small.png');
     this.load.image('wasp', 'wasp.png');
-    this.load.spritesheet('flower', 'flowers-sheet.png', { frameWidth: 400, frameHeight: 400 });
-    this.load.spritesheet('grass-deco', 'grass-sheet.png', { frameWidth: 400, frameHeight: 400 });
-    this.load.spritesheet('hives', 'hives.png', { frameWidth: 400, frameHeight: 400 });
-    this.load.spritesheet('pickups', 'pickups.png', { frameWidth: 400, frameHeight: 400 });
-    this.load.spritesheet('misc', 'misc.png', { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('flower',    'flowers-sheet.png', { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('grass-deco','grass-sheet.png',   { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('hives',     'hives.png',         { frameWidth: 402, frameHeight: 400 });
+    this.load.spritesheet('pickups',   'pickups.png',       { frameWidth: 400, frameHeight: 400 });
+    this.load.spritesheet('misc',      'misc.png',          { frameWidth: 400, frameHeight: 400 });
   }
 
   create() {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
 
-
-
-    // stinger: small white rectangle
     g.clear();
     g.fillStyle(0xffffff);
     g.fillRect(0, 0, 8, 3);
     g.generateTexture('stinger', 8, 3);
 
-    // guard-bee: blue circle
     g.clear();
     g.fillStyle(0x4488ff);
     g.fillCircle(14, 14, 12);
     g.generateTexture('guard-bee', 28, 28);
 
-    // stinger-turret: dark grey hexagon approximated as circle with ring
     g.clear();
     g.fillStyle(0x444444);
     g.fillCircle(20, 20, 18);
@@ -39,7 +46,6 @@ export default class BootScene extends Phaser.Scene {
     g.fillCircle(20, 20, 10);
     g.generateTexture('stinger-turret', 40, 40);
 
-    // web: concentric white rings (semi-transparent)
     g.clear();
     g.lineStyle(2, 0xffffff, 0.7);
     g.strokeCircle(24, 24, 22);
