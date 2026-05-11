@@ -19,8 +19,10 @@ export default class Pickup extends Phaser.Physics.Arcade.Sprite {
     this.setPosition(x, y).setActive(true).setVisible(true);
     if (this.body) this.body.setEnable(true);
     this.body.reset(x, y);
-    this.setVelocity(Phaser.Math.Between(-10, 10), Phaser.Math.Between(-10, 10));
-    this.setDrag(10, 10);
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Phaser.Math.Between(60, 140);
+    this.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+    this.setDrag(120, 120);
   }
 
   release() {
