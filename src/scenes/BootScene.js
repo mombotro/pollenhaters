@@ -21,7 +21,7 @@ export default class BootScene extends Phaser.Scene {
     this.load.image('wasp', 'wasp.png');
     this.load.spritesheet('flower',    'flowers-sheet.png', { frameWidth: 400, frameHeight: 400 });
     this.load.spritesheet('grass-deco','grass-sheet.png',   { frameWidth: 400, frameHeight: 400 });
-    this.load.spritesheet('hives',     'hives.png',         { frameWidth: 402, frameHeight: 400 });
+    this.load.spritesheet('hives',     'hives.png',         { frameWidth: 400, frameHeight: 400 });
     this.load.spritesheet('pickups',   'pickups.png',       { frameWidth: 400, frameHeight: 400 });
     this.load.spritesheet('misc',      'misc.png',          { frameWidth: 400, frameHeight: 400 });
   }
