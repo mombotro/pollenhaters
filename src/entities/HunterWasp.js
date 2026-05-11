@@ -156,7 +156,10 @@ export default class HunterWasp extends Phaser.Physics.Arcade.Sprite {
       const dx = this.x - other.x;
       const dy = this.y - other.y;
       const dist = Math.hypot(dx, dy);
-      if (dist > 0 && dist < RADIUS) {
+      if (dist === 0) {
+        sx += (Math.random() - 0.5) * FORCE;
+        sy += (Math.random() - 0.5) * FORCE;
+      } else if (dist < RADIUS) {
         const s = ((RADIUS - dist) / RADIUS) * FORCE;
         sx += (dx / dist) * s;
         sy += (dy / dist) * s;

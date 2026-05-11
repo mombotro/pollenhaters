@@ -45,7 +45,9 @@ export default class WaspHiveSystem {
     this._lastDefenseAt = time;
     const count = 3 + Math.floor(WaspHiveSystem.countMult(this._totalHoneyStolen));
     for (let i = 0; i < count; i++) {
-      const w = new HunterWasp(this._scene, h.x, h.y);
+      const jx = h.x + (Math.random() - 0.5) * 60;
+      const jy = h.y + (Math.random() - 0.5) * 60;
+      const w = new HunterWasp(this._scene, jx, jy);
       w.setTarget(this._scene.player);
       if (Math.random() < WaspHiveSystem.powerChance(this._totalHoneyStolen)) {
         w.hp = 2; w._speedMult = 1.25;
@@ -62,7 +64,9 @@ export default class WaspHiveSystem {
 
   spawnOnDamage(hive) {
     if (!hive || hive.hp <= 0) return;
-    const w = new HunterWasp(this._scene, hive.x, hive.y);
+    const jx = hive.x + (Math.random() - 0.5) * 60;
+    const jy = hive.y + (Math.random() - 0.5) * 60;
+    const w = new HunterWasp(this._scene, jx, jy);
     w.setTarget(this._scene.player);
     if (Math.random() < WaspHiveSystem.powerChance(this._totalHoneyStolen)) {
       w.hp = 2; w._speedMult = 1.25;
@@ -93,8 +97,11 @@ export default class WaspHiveSystem {
       const archerCount  = Math.floor((waveSpec.archerCount  ?? 0) * mult);
       const pc = WaspHiveSystem.powerChance(this._totalHoneyStolen);
 
+      const jitter = () => ({ x: hx + (Math.random() - 0.5) * 60, y: hy + (Math.random() - 0.5) * 60 });
+
       for (let i = 0; i < hunterCount; i++) {
-        const w = new HunterWasp(this._scene, hx, hy);
+        const { x: wx, y: wy } = jitter();
+        const w = new HunterWasp(this._scene, wx, wy);
         w.setTarget(this._scene.player);
         if (Math.random() < pc) { w.hp = 2; w._speedMult = 1.25; }
         this._scene.wasps.add(w);
@@ -107,19 +114,21 @@ export default class WaspHiveSystem {
       }
 
       for (let i = 0; i < archerCount; i++) {
-        const w = new ArcherWasp(this._scene, hx, hy);
+        const { x: wx, y: wy } = jitter();
+        const w = new ArcherWasp(this._scene, wx, wy);
         w.setTarget(this._scene.player);
         this._scene.wasps.add(w);
       }
 
       for (let i = 0; i < raiderCount; i++) {
+        const { x: wx, y: wy } = jitter();
         const guardPosts = this._scene._towerList
           ? this._scene._towerList.filter(t => t.towerType === 'guard' && t.active && t.hp > 0)
           : [];
         const target = guardPosts.length > 0 && Math.random() < 0.4
           ? Phaser.Utils.Array.GetRandom(guardPosts)
           : this._scene.hive;
-        const w = new RaiderWasp(this._scene, hx, hy, this._scene.hive, target, h);
+        const w = new RaiderWasp(this._scene, wx, wy, this._scene.hive, target, h);
         if (Math.random() < pc) { w.hp = 2; w._speedMult = 1.25; }
         this._scene.wasps.add(w);
         if (Math.random() < 0.5) {

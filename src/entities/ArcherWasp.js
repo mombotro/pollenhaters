@@ -73,6 +73,31 @@ export default class ArcherWasp extends Phaser.Physics.Arcade.Sprite {
         this._lastFired = time;
       }
     }
+    this._separate();
+  }
+
+  _separate() {
+    if (!this.scene?.wasps) return;
+    const RADIUS = 72, FORCE = 1200;
+    let sx = 0, sy = 0;
+    this.scene.wasps.getChildren().forEach(other => {
+      if (!other.active || other === this) return;
+      const dx = this.x - other.x;
+      const dy = this.y - other.y;
+      const d = Math.hypot(dx, dy);
+      if (d === 0) {
+        sx += (Math.random() - 0.5) * FORCE;
+        sy += (Math.random() - 0.5) * FORCE;
+      } else if (d < RADIUS) {
+        const s = ((RADIUS - d) / RADIUS) * FORCE;
+        sx += (dx / d) * s;
+        sy += (dy / d) * s;
+      }
+    });
+    if (sx !== 0 || sy !== 0) {
+      this.body.acceleration.x += sx;
+      this.body.acceleration.y += sy;
+    }
   }
 
   takeDamage(amount) {
