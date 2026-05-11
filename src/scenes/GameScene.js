@@ -402,8 +402,36 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.physics.world.resume();
+    // Build menu or placement — freeze game, handle only those inputs
+    if (this.buildMenu.visible || this._placing !== null) {
+      this.physics.world.pause();
+      if (_pad && this.buildMenu.visible) this.buildMenu.gpUpdate(_pad);
+      if (this._placing && _pad) {
+        const DEAD = 0.15, SPEED = 600;
+        const rx = Math.abs(_pad.rightStick.x) > DEAD ? _pad.rightStick.x : 0;
+        const ry = Math.abs(_pad.rightStick.y) > DEAD ? _pad.rightStick.y : 0;
+        if (this._ghost && (rx !== 0 || ry !== 0)) {
+          this._ghost.x = Phaser.Math.Clamp(this._ghost.x + rx * SPEED * (delta / 1000), 0, WORLD.WIDTH);
+          this._ghost.y = Phaser.Math.Clamp(this._ghost.y + ry * SPEED * (delta / 1000), 0, WORLD.HEIGHT);
+        }
+        const aDown = _pad.buttons[0]?.pressed ?? false;
+        if (aDown && !this._gpPlaceAWas) {
+          if (this._ghost) this._placeTower(this._placing, this._ghost.x, this._ghost.y);
+          this._cancelPlacement();
+        }
+        this._gpPlaceAWas = aDown;
+        const bDown = _pad.buttons[1]?.pressed ?? false;
+        if (bDown && !this._gpPlaceBWas) {
+          this._cancelPlacement();
+          if (this.player) this.player._gpBWasDown = true;
+        }
+        this._gpPlaceBWas = bDown;
+      }
+      this._touchControls.update();
+      return;
+    }
 
+    this.physics.world.resume();
     this.physics.world.timeScale = 1;
     this.time.timeScale = 1;
 
@@ -417,29 +445,6 @@ export default class GameScene extends Phaser.Scene {
     if (!this._playground && this._playTime >= this._runDuration) {
       this._endGame(true);
       return;
-    }
-
-    // Gamepad ghost placement
-    if (this._placing && _pad) {
-      const DEAD = 0.15, SPEED = 600;
-      const rx = Math.abs(_pad.rightStick.x) > DEAD ? _pad.rightStick.x : 0;
-      const ry = Math.abs(_pad.rightStick.y) > DEAD ? _pad.rightStick.y : 0;
-      if (this._ghost && (rx !== 0 || ry !== 0)) {
-        this._ghost.x = Phaser.Math.Clamp(this._ghost.x + rx * SPEED * (delta / 1000), 0, WORLD.WIDTH);
-        this._ghost.y = Phaser.Math.Clamp(this._ghost.y + ry * SPEED * (delta / 1000), 0, WORLD.HEIGHT);
-      }
-      const aDown = _pad.buttons[0]?.pressed ?? false;
-      if (aDown && !this._gpPlaceAWas) {
-        if (this._ghost) this._placeTower(this._placing, this._ghost.x, this._ghost.y);
-        this._cancelPlacement();
-      }
-      this._gpPlaceAWas = aDown;
-      const bDown = _pad.buttons[1]?.pressed ?? false;
-      if (bDown && !this._gpPlaceBWas) {
-        this._cancelPlacement();
-        if (this.player) this.player._gpBWasDown = true;
-      }
-      this._gpPlaceBWas = bDown;
     }
 
     // Wind computed first so wasps can counter it when they have no target
@@ -545,7 +550,6 @@ export default class GameScene extends Phaser.Scene {
       if (wave) this.waspHiveSystem.spawnWave(wave);
     }
     this.waspHiveSystem.update(this._gameTime);
-    if (_pad && this.buildMenu.visible) this.buildMenu.gpUpdate(_pad);
     if (_pad && this._playground && this._pgBtns) this._updatePlaygroundGamepad(_pad);
     this._touchControls.update();
   }
