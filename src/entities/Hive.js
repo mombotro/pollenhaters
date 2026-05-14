@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { HIVE } from '../constants.js';
+import { HIVE, DEPTH } from '../constants.js';
 
 export default class Hive extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -7,6 +7,7 @@ export default class Hive extends Phaser.Physics.Arcade.Sprite {
     this.setScale(0.2);
     scene.add.existing(this);
     scene.physics.add.existing(this, true); // static body
+    this.setDepth(DEPTH.ENTITY);
     this.hp = HIVE.HP;
     this.maxHp = HIVE.HP;
   }

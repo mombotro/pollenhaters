@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { WEB } from '../constants.js';
+import { WEB, DEPTH } from '../constants.js';
 
 export default class WebTrap extends Phaser.GameObjects.Line {
   constructor(scene, f1, f2) {
@@ -7,6 +7,7 @@ export default class WebTrap extends Phaser.GameObjects.Line {
     this.setOrigin(0, 0);
     this.setLineWidth(2);
     scene.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this._contactStart = null;
     this._f1 = f1;
     this._f2 = f2;

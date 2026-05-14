@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { WASP_HIVE } from '../constants.js';
+import { WASP_HIVE, DEPTH } from '../constants.js';
 
 export default class WaspHive extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -7,6 +7,7 @@ export default class WaspHive extends Phaser.Physics.Arcade.Sprite {
     this.setScale(0.2);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.body.setImmovable(true);
     this.hp = WASP_HIVE.HP;
     this.maxHp = WASP_HIVE.HP;

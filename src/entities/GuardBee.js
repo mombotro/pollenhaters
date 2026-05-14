@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TOWER } from '../constants.js';
+import { TOWER, DEPTH } from '../constants.js';
 import Stinger from './Stinger.js';
 
 export default class GuardBee extends Phaser.Physics.Arcade.Sprite {
@@ -7,6 +7,7 @@ export default class GuardBee extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'player-bee');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setScale(0.5).setTint(0x4488ff);
     this.setCollideWorldBounds(true);
     this.hp = TOWER.GUARD_BEE_HP;

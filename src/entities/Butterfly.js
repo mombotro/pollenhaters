@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BUTTERFLY, WORLD } from '../constants.js';
+import { BUTTERFLY, WORLD, DEPTH } from '../constants.js';
 
 export default class Butterfly extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -7,6 +7,7 @@ export default class Butterfly extends Phaser.Physics.Arcade.Sprite {
     this.setScale(0.05);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setCollideWorldBounds(true);
     this._angle    = Math.random() * Math.PI * 2;
     this._nextTurn = 0;

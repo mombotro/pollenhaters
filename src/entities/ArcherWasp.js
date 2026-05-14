@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ARCHER_WASP, TOWER } from '../constants.js';
+import { ARCHER_WASP, TOWER, DEPTH } from '../constants.js';
 import Stinger from './Stinger.js';
 
 export default class ArcherWasp extends Phaser.Physics.Arcade.Sprite {
@@ -8,6 +8,7 @@ export default class ArcherWasp extends Phaser.Physics.Arcade.Sprite {
     this.setScale(1.0).setTint(0xaa44ff);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.waspType = 'archer';
     this.hp = ARCHER_WASP.HP;
     this._target = null;

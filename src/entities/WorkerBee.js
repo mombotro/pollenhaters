@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { WORKER } from '../constants.js';
+import { WORKER, DEPTH } from '../constants.js';
 
 const STATE = { SEEK: 'seek', COLLECT: 'collect', RETURN: 'return' };
 
@@ -7,6 +7,7 @@ export default class WorkerBee extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'player-bee');
     scene.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setScale(0.5).setTint(0x88ff44);
     scene.physics.add.existing(this);
     this.setCollideWorldBounds(true);

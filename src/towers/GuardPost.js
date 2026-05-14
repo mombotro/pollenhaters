@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TOWER } from '../constants.js';
+import { TOWER, DEPTH } from '../constants.js';
 import GuardBee from '../entities/GuardBee.js';
 
 export default class GuardPost extends Phaser.Physics.Arcade.Sprite {
@@ -7,6 +7,7 @@ export default class GuardPost extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'misc', 0);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setScale(0.1);
     this.body.setImmovable(true);
     this.towerType = 'guard';

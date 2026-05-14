@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { WORLD, BEE, HIVE, WASP, WAVE, FLOWER, TIMER, WORKER, TOWER, XP, BUTTERFLY, SPIDER, WEB, WIND, BREAKABLE, SOLDIER, PICKUP, NECTAR_FOUNTAIN, pickFlowerType } from '../constants.js';
+import { WORLD, BEE, HIVE, WASP, WAVE, FLOWER, TIMER, WORKER, TOWER, XP, BUTTERFLY, SPIDER, WEB, WIND, BREAKABLE, SOLDIER, PICKUP, NECTAR_FOUNTAIN, DEPTH, pickFlowerType } from '../constants.js';
 import MetaSave from '../systems/MetaSave.js';
 import Flower from '../entities/Flower.js';
 import Hive from '../entities/Hive.js';
@@ -56,7 +56,7 @@ export default class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, WORLD.WIDTH, WORLD.HEIGHT);
 
     const BT = 56;
-    const borderGfx = this.add.graphics().setDepth(6);
+    const borderGfx = this.add.graphics().setDepth(DEPTH.BORDER);
     borderGfx.fillStyle(0x142d0a, 1);
     borderGfx.fillRect(0, 0, WORLD.WIDTH, BT);
     borderGfx.fillRect(0, WORLD.HEIGHT - BT, WORLD.WIDTH, BT);
@@ -73,7 +73,8 @@ export default class GameScene extends Phaser.Scene {
         .setScale(scale)
         .setAlpha(0.9)
         .setFlipX(Math.random() < 0.5)
-        .setCrop(4, 4, 392, 392);
+        .setCrop(4, 4, 392, 392)
+        .setDepth(DEPTH.ENVIRONMENT);
       this._decoList.push(img);
     }
     this.physics.world.setBounds(0, 0, WORLD.WIDTH, WORLD.HEIGHT);
@@ -544,6 +545,7 @@ export default class GameScene extends Phaser.Scene {
       ...(this.player.alive ? [this.player] : []),
       ...this.wasps.getChildren().filter(w => w.active),
       ...this.workers.getChildren().filter(w => w.alive && w.active),
+      ...this.soldiers.getChildren().filter(w => w.alive && w.active),
     ];
     this._webList = this._webList.filter(w => {
       if (!w.active) return false;
@@ -734,14 +736,17 @@ export default class GameScene extends Phaser.Scene {
   _spawnFlower(x, y, initialBloom = false) {
     const type = pickFlowerType(Phaser.Math.Between(1, 100));
     const f = new Flower(this, x, y, type, initialBloom);
+    f.setDepth(DEPTH.ENVIRONMENT);
     f.onDead = () => {
       const fx = f.x, fy = f.y;
-      this.add.image(fx, fy, 'grass-deco', Phaser.Math.Between(0, 6))
+      const grassImg = this.add.image(fx, fy, 'grass-deco', Phaser.Math.Between(0, 6))
         .setScale(Phaser.Math.FloatBetween(0.08, 0.12))
         .setAlpha(0.85)
         .setFlipX(Math.random() < 0.5)
-        .setCrop(4, 4, 392, 392);
+        .setCrop(4, 4, 392, 392)
+        .setDepth(DEPTH.ENVIRONMENT);
       this.time.delayedCall(FLOWER.RESPAWN_DELAY, () => {
+        grassImg.destroy();
         if (!this._ended) {
           const rx = Phaser.Math.Between(100, WORLD.WIDTH - 100);
           const ry = Phaser.Math.Between(100, WORLD.HEIGHT - 100);

@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
-import { BEE } from '../constants.js';
+import { BEE, DEPTH } from '../constants.js';
 
 export default class Stinger extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'stinger');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.damage = BEE.STINGER_DAMAGE;
     this._lifetimeEvent = null;
     this.setActive(false).setVisible(false);

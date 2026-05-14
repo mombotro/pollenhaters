@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SOLDIER } from '../constants.js';
+import { SOLDIER, DEPTH } from '../constants.js';
 import Stinger from './Stinger.js';
 
 export default class SoldierBee extends Phaser.Physics.Arcade.Sprite {
@@ -7,6 +7,7 @@ export default class SoldierBee extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'player-bee');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setCollideWorldBounds(true);
     this.setScale(0.55);
     this.setTint(0xff8800);

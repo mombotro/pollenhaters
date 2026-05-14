@@ -3,6 +3,17 @@ export const WORLD = {
   HEIGHT: 2160,
 };
 
+export const DEPTH = {
+  ENVIRONMENT: 1,   // grass deco, flowers, fountains
+  ENTITY:      5,   // wasps, bees, towers, pickups, breakables
+  BORDER:      6,   // map border overlay
+  PLAYER:      10,  // player bee
+  GHOST:       50,  // placement ghost
+  HUD:         100,
+  UI:          200,
+  OVERLAY:     300,
+};
+
 export const BEE = {
   SPEED: 200,
   HP: 5,

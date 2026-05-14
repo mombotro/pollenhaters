@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BEE } from '../constants.js';
+import { BEE, DEPTH } from '../constants.js';
 import SoundSynth from '../systems/SoundSynth.js';
 
 export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
@@ -7,7 +7,7 @@ export default class PlayerBee extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'player-bee');
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setDepth(10);
+    this.setDepth(DEPTH.PLAYER);
     this.setCollideWorldBounds(true);
     this.hp = BEE.HP;
     this.maxHp = BEE.HP;

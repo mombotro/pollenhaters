@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
-import { TOWER } from '../constants.js';
+import { TOWER, DEPTH } from '../constants.js';
 
 export default class PoisonHoney extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'misc', 9);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setScale(0.08);
     this.body.setImmovable(true);
     this.towerType = 'poison-honey';

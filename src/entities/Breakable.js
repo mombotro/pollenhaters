@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BREAKABLE } from '../constants.js';
+import { BREAKABLE, DEPTH } from '../constants.js';
 import SoundSynth from '../systems/SoundSynth.js';
 
 export default class Breakable extends Phaser.Physics.Arcade.Sprite {
@@ -7,6 +7,7 @@ export default class Breakable extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'pickups', 4);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.setImmovable(true);
     this.setScale(0.08);
     this.hp = BREAKABLE.HP;

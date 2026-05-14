@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { WASP, TOWER } from '../constants.js';
+import { WASP, TOWER, DEPTH } from '../constants.js';
 import SoundSynth from '../systems/SoundSynth.js';
 
 export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
@@ -8,6 +8,7 @@ export default class RaiderWasp extends Phaser.Physics.Arcade.Sprite {
     this.setScale(1.0).setTint(0xff8866);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.waspType = 'raider';
     this.hp = WASP.HP;
     this._hive = hive;

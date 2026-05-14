@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TOWER } from '../constants.js';
+import { TOWER, DEPTH } from '../constants.js';
 import Stinger from '../entities/Stinger.js';
 
 export default class StingerTurret extends Phaser.Physics.Arcade.Sprite {
@@ -7,6 +7,7 @@ export default class StingerTurret extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'stinger-turret');
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.body.setImmovable(true);
     this.towerType = 'stinger';
     this._lastFired = 0;

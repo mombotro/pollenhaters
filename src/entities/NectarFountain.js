@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
-import { NECTAR_FOUNTAIN } from '../constants.js';
+import { NECTAR_FOUNTAIN, DEPTH } from '../constants.js';
 
 export default class NectarFountain extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'nectar-fountain', 0);
     this.setScale(0.25);
     scene.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.towerType = 'nectar-fountain';
     this.hp = NECTAR_FOUNTAIN.HP;
   }

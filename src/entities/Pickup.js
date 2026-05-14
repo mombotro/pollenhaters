@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PICKUP, XP } from '../constants.js';
+import { PICKUP, XP, DEPTH } from '../constants.js';
 import SoundSynth from '../systems/SoundSynth.js';
 
 export default class Pickup extends Phaser.Physics.Arcade.Sprite {
@@ -7,6 +7,7 @@ export default class Pickup extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'pickups', 0);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(DEPTH.ENTITY);
     this.type = 'xp';
     this.setScale(0.1);
     this.setActive(false).setVisible(false);
